@@ -514,7 +514,7 @@ int * ga_IntToBin (int num, int k, int *binary){
 	for ( i = k; i < 0 ; i--){
 		
 		binary[i] = (resto % 2);
-		if(resto = 1) break;
+		if(resto == 1) break;
 		resto = resto/2;
 
 		
@@ -551,12 +551,14 @@ int ga_BinToInt (int *binnum, int k){
 
 }
 
-int do_ga_addicted_rand(real *e, real energy, int size)
+int do_ga_addicted_rand(real *e, real energy, int size, FILE *fplog,t_commrec *cr)
 {
-	int i;
+	int i, energy_aux;
 	real index, aux;
 	aux = 0;
-	index = rand() % (int)floor(energy);
+    index = 0;
+    energy_aux = floor((double)energy);
+	index += rand() % energy_aux;
 	for(i = 0; ((i < size) && (aux < index)); i ++)
 	{
 		aux += e[i];
@@ -2420,27 +2422,13 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   em_state_t **s_pop;
   em_state_t *s_min;
   
-  precision = 50;
-  generations = 100;
+  //precision = 50;
+  //generations = 100;
+
 
   s_father = init_em_state();
   s_mother = init_em_state();
-
-  //populationSize = ir->popSize;
-  populationSize = 100;
-
-  s_pop = (em_state_t **) malloc(sizeof(em_state_t *) * populationSize);
-  pop_energy = (real *) malloc(sizeof(real) * populationSize);
-  pop_em = (real *) malloc(sizeof(real) * populationSize);
- 
-  for(popCount = 0; popCount < populationSize; popCount++)
-  {
-  	s_pop[popCount] = init_em_state();
-	pop_energy[popCount] = 0;
-	pop_em[popCount] = 0;
-  }
-
-
+  //populationSize = 100;
 
   /* Init em and store the local state in s_father */
   init_em(fplog,SD,cr,inputrec,
@@ -2452,6 +2440,20 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   start_t=print_date_and_time(fplog,cr->nodeid,"Started Genetic Algorithm");
   wallcycle_start(wcycle,ewcRUN);
     
+  precision = inputrec->gaPrecision;
+  generations = inputrec->gaGenerations;
+  populationSize = inputrec->popSize;
+  s_pop = (em_state_t **) malloc(sizeof(em_state_t *) * populationSize);
+  pop_energy = (real *) malloc(sizeof(real) * populationSize);
+  pop_em = (real *) malloc(sizeof(real) * populationSize);
+
+  for(popCount = 0; popCount < populationSize; popCount++)
+  {
+  	s_pop[popCount] = init_em_state();
+	pop_energy[popCount] = 0;
+	pop_em[popCount] = 0;
+  }
+
   /* Set variables for stepsize (in nm). This is the largest  
    * step that we are going to make in any direction. 
    */
@@ -2466,6 +2468,7 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
     sp_header(stderr,SD,inputrec->em_tol,nsteps);
   if (fplog)
     sp_header(fplog,SD,inputrec->em_tol,nsteps);
+
     
   /* GA Randomizer */
 
@@ -2476,9 +2479,19 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   for(popCount = 0; popCount < populationSize; popCount++)
   {
 
+    /*if (MASTER(cr)) 
+        /* Print to the screen  */
+    /*    fprintf(stderr,"Passou 00 - %d",popCount);
+    if (fplog)
+        fprintf(fplog,"Passou 00 - %d",popCount);
   	s1 = &s_father->s;
   	s2 = &s_pop[popCount]->s;
   	s2->flags = s1->flags;
+    if (MASTER(cr)) 
+        /* Print to the screen  */
+    /*    fprintf(stderr,"Passou 01 - %d",popCount);
+    if (fplog)
+        fprintf(fplog,"Passou 01 - %d",popCount);
   	if (s2->nalloc != s1->nalloc) {
     		s2->nalloc = s1->nalloc;
    		srenew(s2->x,s1->nalloc);
@@ -2487,16 +2500,58 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
       			srenew(s2->cg_p,  s1->nalloc);
   	}
   
+    if (MASTER(cr)) 
+        /* Print to the screen  */
+    /*    fprintf(stderr,"Passou 02 - %d",popCount);
+    if (fplog)
+        fprintf(fplog,"Passou 02 - %d",popCount);
+
   	s2->natoms = s1->natoms;
   	s2->lambda = s1->lambda;
   	copy_mat(s1->box,s2->box);
-	s2->x = s1->x;
+	s2->x = s1->x;*/
+    /*
+    if (DOMAINDECOMP(cr)) {
+    dd_init_local_state(cr->dd,state_global,&s_pop[popCount]->s);
+
+    dd_partition_system(fplog,inputrec->init_step,cr,TRUE,
+			state_global,top_global,inputrec,
+			&s_pop[popCount]->s,&s_pop[popCount]->f,&buf,mdatoms,top,
+			fr,vsite,NULL,constr,
+			nrnb,NULL,FALSE);
+    dd_store_state(cr->dd,&s_pop[popCount]->s);
+    } 
+    else {*/
+    s1 = &s_father->s;
+    s_pop[popCount]->s = *s1;
+    snew(s_pop[popCount]->s.x,s_pop[popCount]->s.nalloc);
+    snew(s_pop[popCount]->f,s_pop[popCount]->s.nalloc);
+    int ic;
+    for(ic=0; ic<s1->natoms; ic++)
+      copy_rvec(s1->x[ic],s_pop[popCount]->s.x[ic]);
+    copy_mat(s1->box,s_pop[popCount]->s.box);
+
+  	s_pop[popCount]->s.flags = s_father->s.flags;
+  	s_pop[popCount]->s.natoms = s_father->s.natoms;
+  	s_pop[popCount]->s.lambda = s_father->s.lambda;
+    //}
 	do_ga_randomizer(s_pop[popCount], start, end);
-    	evaluate_energy(fplog,bVerbose,cr,
-		    state_global,top_global,s_pop[popCount],&buf,top,
+
+  }
+
+  for(popCount = 0; popCount < populationSize; popCount++)
+  {
+    if (MASTER(cr)) 
+        /* Print to the screen  */
+        fprintf(stderr,"\rPassou 0121 - %d - %f\n",popCount, s_father->epot);
+    if (fplog)
+        fprintf(fplog,"\rPassou 0121 - %d- %f\n",popCount, s_father->epot);
+    evaluate_energy(fplog,bVerbose,cr,                                      // something is wrong when you evaluate some one that is not s_father.
+		    state_global,top_global,s_father,&buf,top,                      // maybe something wrong with the way I'm randomizing?
 		    inputrec,nrnb,wcycle,
 		    vsite,constr,fcd,graph,mdatoms,fr,
-		    mu_tot,enerd,vir,pres,count,count==0);
+		    mu_tot,enerd,vir,pres,-1,FALSE);
+
 	pop_energy[popCount] = s_pop[popCount]->epot;
 	popEnergyTotal += pop_energy[popCount];
   }
@@ -2518,8 +2573,8 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   while( !bDone && !bAbort ) {
     bAbort = (nsteps > 0) && (count==nsteps);
 
-    cand1 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize);
-    cand2 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize);
+    cand1 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize, fplog, cr); //floating point exception | may be caused by evaluate error.
+    cand2 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize, fplog, cr);
     
 	s_father = s_pop[cand1];
 	s_mother = s_pop[cand2];
@@ -2530,17 +2585,35 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 		 constr,top,nrnb,wcycle,count, precision);
     }
     
+    if (MASTER(cr)) 
+        /* Print to the screen  */
+        fprintf(stderr,"Passou 02");
+    if (fplog)
+        fprintf(fplog,"Passou 02");
+    
     evaluate_energy(fplog,bVerbose,cr,
 		    state_global,top_global,s_father,&buf,top,
 		    inputrec,nrnb,wcycle,
 		    vsite,constr,fcd,graph,mdatoms,fr,
 		    mu_tot,enerd,vir,pres,count,count==0);
+    
+    if (MASTER(cr)) 
+        /* Print to the screen  */
+        fprintf(stderr,"Passou 04");
+    if (fplog)
+        fprintf(fplog,"Passou 04");
 
     evaluate_energy(fplog,bVerbose,cr,
 		    state_global,top_global,s_mother,&buf,top,
 		    inputrec,nrnb,wcycle,
 		    vsite,constr,fcd,graph,mdatoms,fr,
 		    mu_tot,enerd,vir,pres,count,count==0);
+    
+    if (MASTER(cr)) 
+        /* Print to the screen  */
+        fprintf(stderr,"Passou 03");
+    if (fplog)
+        fprintf(fplog,"Passou 03");
 
 	pop_energy[cand1] = s_father->epot;
 	pop_energy[cand2] = s_mother->epot;

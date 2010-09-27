@@ -218,6 +218,9 @@ typedef struct {
   real em_tol;		    /* The tolerance				*/
   int  niter;           /* Number of iterations for convergence of      */
                         /* steepest descent in relax_shells             */
+  int gaPrecision;      /* Precision of the GA Binary                   */
+  int gaGenerations;    /* Number of generations for the GA population  */
+  int popSize;          /* Size of the GA population                    */
   real fc_stepsize;     /* Stepsize for directional minimization        */
                         /* in relax_shells                              */
   int  nstcgsteep;      /* number of steps after which a steepest       */

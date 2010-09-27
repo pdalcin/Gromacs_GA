@@ -1,0 +1,5 @@
+g_cluster.o: g_cluster.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

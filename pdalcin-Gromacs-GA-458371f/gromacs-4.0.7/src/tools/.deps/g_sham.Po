@@ -1,0 +1,5 @@
+g_sham.o: g_sham.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

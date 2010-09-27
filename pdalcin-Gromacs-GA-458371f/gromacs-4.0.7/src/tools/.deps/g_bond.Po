@@ -1,0 +1,5 @@
+g_bond.o: g_bond.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

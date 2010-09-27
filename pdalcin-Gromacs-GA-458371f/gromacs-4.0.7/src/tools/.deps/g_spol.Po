@@ -1,0 +1,5 @@
+g_spol.o: g_spol.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

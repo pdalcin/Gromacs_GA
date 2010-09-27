@@ -1,0 +1,5 @@
+g_covar.o: g_covar.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

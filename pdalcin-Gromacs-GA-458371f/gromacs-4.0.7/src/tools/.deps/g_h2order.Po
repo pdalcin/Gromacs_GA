@@ -1,0 +1,5 @@
+g_h2order.o: g_h2order.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

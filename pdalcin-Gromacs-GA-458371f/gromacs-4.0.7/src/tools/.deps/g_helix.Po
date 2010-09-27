@@ -1,0 +1,5 @@
+g_helix.o: g_helix.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

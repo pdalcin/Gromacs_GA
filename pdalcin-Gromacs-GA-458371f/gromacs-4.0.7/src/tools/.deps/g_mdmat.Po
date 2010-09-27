@@ -1,0 +1,5 @@
+g_mdmat.o: g_mdmat.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

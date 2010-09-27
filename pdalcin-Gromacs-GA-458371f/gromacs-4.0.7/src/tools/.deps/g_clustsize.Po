@@ -1,0 +1,5 @@
+g_clustsize.o: g_clustsize.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

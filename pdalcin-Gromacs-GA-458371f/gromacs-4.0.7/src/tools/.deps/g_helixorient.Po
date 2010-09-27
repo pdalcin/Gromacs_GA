@@ -1,0 +1,6 @@
+g_helixorient.o: g_helixorient.c ../../src/config.h \
+  ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

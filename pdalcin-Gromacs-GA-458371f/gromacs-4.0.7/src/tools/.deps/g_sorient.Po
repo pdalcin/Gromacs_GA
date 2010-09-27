@@ -1,0 +1,5 @@
+g_sorient.o: g_sorient.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

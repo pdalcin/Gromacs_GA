@@ -1,0 +1,8 @@
+sgeqr2.lo: sgeqr2.c ../../../include/gmx_lapack.h ../../../src/config.h \
+  ../../../include/types/simple.h
+
+../../../include/gmx_lapack.h:
+
+../../../src/config.h:
+
+../../../include/types/simple.h:

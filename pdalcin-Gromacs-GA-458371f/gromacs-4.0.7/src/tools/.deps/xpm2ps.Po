@@ -1,0 +1,5 @@
+xpm2ps.o: xpm2ps.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

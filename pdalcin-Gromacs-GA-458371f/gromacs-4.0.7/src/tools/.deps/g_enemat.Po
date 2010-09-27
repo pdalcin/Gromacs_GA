@@ -1,0 +1,5 @@
+g_enemat.o: g_enemat.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

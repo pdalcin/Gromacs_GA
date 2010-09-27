@@ -1,0 +1,5 @@
+g_rmsdist.o: g_rmsdist.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

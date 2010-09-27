@@ -1,0 +1,5 @@
+g_mindist.o: g_mindist.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

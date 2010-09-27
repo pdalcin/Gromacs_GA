@@ -1,0 +1,5 @@
+g_angle.o: g_angle.c ../../src/config.h ../../include/gmx_ana.h
+
+../../src/config.h:
+
+../../include/gmx_ana.h:

@@ -1,0 +1,13 @@
+strti2.lo: strti2.c ../../../include/gmx_blas.h ../../../src/config.h \
+  ../../../include/types/simple.h ../../../include/gmx_lapack.h \
+  lapack_limits.h
+
+../../../include/gmx_blas.h:
+
+../../../src/config.h:
+
+../../../include/types/simple.h:
+
+../../../include/gmx_lapack.h:
+
+lapack_limits.h:

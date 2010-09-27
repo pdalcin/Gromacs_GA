@@ -1,0 +1,10 @@
+dormqr.lo: dormqr.c ../../../include/gmx_lapack.h ../../../src/config.h \
+  ../../../include/types/simple.h lapack_limits.h
+
+../../../include/gmx_lapack.h:
+
+../../../src/config.h:
+
+../../../include/types/simple.h:
+
+lapack_limits.h:

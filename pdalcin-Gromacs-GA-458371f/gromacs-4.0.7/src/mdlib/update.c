@@ -66,6 +66,7 @@
 #include "disre.h"
 #include "orires.h"
 #include "gmx_wallcycle.h"
+#include "3dview.h"
 
 typedef struct {
   double gdt;
@@ -742,6 +743,240 @@ static void deform(int start,int homenr,rvec x[],matrix box,matrix *scale_tot,
   }
 }
 
+void bond_rot(t_graph *graph,int ai,int aj,int *list,int *nr,int afix)
+{
+  int i,k;
+  for(i=0;i<graph->nedge[aj];i++)
+  {
+   if(graph->edge[aj][i] != ai)
+   {
+    for(k=0;k < (*nr);k++)
+    {
+     if(graph->edge[aj][i] == list[k])
+      break;
+    }
+    if(k == *nr)
+    {
+     if(afix == -1 ||graph->edge[aj][i] != afix)
+     {
+      list[(*nr)++] = graph->edge[aj][i];
+      bond_rot(graph,aj,graph->edge[aj][i],list,nr,afix);
+     }
+    }
+   }
+  }
+ return;
+}
+void rand_rot_mc(rvec x,vec4 xrot,
+                     rvec delta,rvec xcm)
+{
+  mat4 mt1,mt2,mr[DIM],mtemp1,mtemp2,mtemp3,mxtot,mvtot;
+  real phi;
+  int  i,m;
+  
+  
+  translate(-xcm[XX],-xcm[YY],-xcm[ZZ],mt1);  /* move c.o.ma to origin */
+
+  for(m=0; (m<DIM); m++) {
+    rotate(m,delta[m],mr[m]);
+  }
+
+  translate(xcm[XX],xcm[YY],xcm[ZZ],mt2);
+
+  /* For mult_matrix we need to multiply in the opposite order
+   * compared to normal mathematical notation.
+   */
+  mult_matrix(mtemp1,mt1,mr[XX]);
+  mult_matrix(mtemp2,mr[YY],mr[ZZ]);
+  mult_matrix(mtemp3,mtemp1,mtemp2);
+  mult_matrix(mxtot,mtemp3,mt2);
+  mult_matrix(mvtot,mr[XX],mtemp2);
+  
+  m4_op(mxtot,x,xrot);
+}
+
+void stretch_bonds(rvec *x,gmx_mc_move *mc_move,t_graph *graph)
+{
+  int ai,aj,ak,nr,list_r[200],*list;
+  int k,m;
+  rvec r1,r_ij,u1,v;
+
+     ai = mc_move->group[MC_BONDS].ai;
+     aj = mc_move->group[MC_BONDS].aj;
+     nr = 0;
+     bond_rot(graph,ai,aj,list_r,&nr,-1);
+     list=list_r;
+     copy_rvec(x[aj],r1);
+     rvec_sub(x[aj],x[ai],r_ij);
+     unitv(r_ij,u1);
+
+     svmul(mc_move->group[MC_BONDS].value,u1,v);
+
+     rvec_add(x[aj],v,x[aj]);
+     for(k=0;k<nr;k++) {
+      ak=list[k];
+      rvec_add(x[ak],v,x[ak]);
+     }
+
+}
+
+void rotate_dihedral(rvec *x,gmx_mc_move *mc_move,t_graph *graph)
+{
+  int    n,i,k,start,end;
+  int    ai,aj,ak,nr,list_r[400],*list;
+  rvec   r_ij,r_kj,r1,r2,u1,u2,u3;
+  vec4 xrot;
+  rvec xcm;
+  matrix basis,basis_inv;
+  rvec delta_phi;
+     ai = mc_move->group[MC_DIHEDRALS].ai;
+     aj = mc_move->group[MC_DIHEDRALS].aj;
+
+     nr = 0;
+     bond_rot(graph,ai,aj,list_r,&nr,-1);
+
+     list = list_r;
+
+     ak=list[0];
+     rvec_sub(x[aj],x[ai],r_ij);
+     rvec_sub(x[aj],x[ak],r_kj);
+     cprod(r_ij,r_kj,r1);
+     cprod(r_ij,r1,r2);
+
+     unitv(r_ij,u1);
+     unitv(r1,u2);
+     unitv(r2,u3);
+    
+     basis[XX][XX] = u1[XX]; basis[XX][YY] = u2[XX]; basis[XX][ZZ] = u3[XX]; 
+     basis[YY][XX] = u1[YY]; basis[YY][YY] = u2[YY]; basis[YY][ZZ] = u3[YY]; 
+     basis[ZZ][XX] = u1[ZZ]; basis[ZZ][YY] = u2[ZZ]; basis[ZZ][ZZ] = u3[ZZ]; 
+
+     basis_inv[XX][XX] = basis[XX][XX]; basis_inv[XX][YY] = basis[YY][XX]; basis_inv[XX][ZZ] = basis[ZZ][XX]; 
+     basis_inv[YY][XX] = basis[XX][YY]; basis_inv[YY][YY] = basis[YY][YY]; basis_inv[YY][ZZ] = basis[ZZ][YY]; 
+     basis_inv[ZZ][XX] = basis[XX][ZZ]; basis_inv[ZZ][YY] = basis[YY][ZZ]; basis_inv[ZZ][ZZ] = basis[ZZ][ZZ]; 
+
+
+     clear_rvec(xcm);
+     clear_rvec(delta_phi);
+     delta_phi[XX]=mc_move->group[MC_DIHEDRALS].value;
+
+     
+     for(k=0;k<nr;k++) {
+      ak=list[k];
+      rvec_sub(x[ak],x[aj],r_kj);
+      mvmul(basis_inv,r_kj,r1);
+      rand_rot_mc(r1,xrot,delta_phi,xcm);
+      for(i=0;i<DIM;i++)
+       r1[i]=xrot[i];
+      mvmul(basis,r1,r2);
+      rvec_add(x[aj],r2,x[ak]);
+     }
+}
+
+void bend_angles(rvec *x,gmx_mc_move *mc_move,t_graph *graph)
+{
+  int    n,i,k,start,end;
+  int    ai,aj,ak,al,nr_r,nr_l,nr,list_r[200],*list;
+  rvec   r_ij,r_kj,r_lj,r1,r2,u1,u2,u3;
+  vec4 xrot;
+  rvec xcm;
+  matrix basis,basis_inv;
+  rvec delta_phi,delta;
+
+     ai = mc_move->group[MC_ANGLES].ai;
+     aj = mc_move->group[MC_ANGLES].aj;
+     ak = mc_move->group[MC_ANGLES].ak;
+
+     nr = 0;
+     bond_rot(graph,aj,ak,list_r,&nr,-1);
+     list=list_r;
+
+     rvec_sub(x[aj],x[ai],r_ij);
+     rvec_sub(x[aj],x[ak],r_kj);
+     cprod(r_ij,r_kj,r1);
+     cprod(r_ij,r1,r2);
+
+     unitv(r_ij,u2);
+     unitv(r1,u1);
+     unitv(r2,u3);
+    
+     basis[XX][XX] = u1[XX]; basis[XX][YY] = u2[XX]; basis[XX][ZZ] = u3[XX]; 
+     basis[YY][XX] = u1[YY]; basis[YY][YY] = u2[YY]; basis[YY][ZZ] = u3[YY]; 
+     basis[ZZ][XX] = u1[ZZ]; basis[ZZ][YY] = u2[ZZ]; basis[ZZ][ZZ] = u3[ZZ]; 
+
+     basis_inv[XX][XX] = basis[XX][XX]; basis_inv[XX][YY] = basis[YY][XX]; basis_inv[XX][ZZ] = basis[ZZ][XX]; 
+     basis_inv[YY][XX] = basis[XX][YY]; basis_inv[YY][YY] = basis[YY][YY]; basis_inv[YY][ZZ] = basis[ZZ][YY]; 
+     basis_inv[ZZ][XX] = basis[XX][ZZ]; basis_inv[ZZ][YY] = basis[YY][ZZ]; basis_inv[ZZ][ZZ] = basis[ZZ][ZZ]; 
+
+
+     clear_rvec(xcm);
+     clear_rvec(delta_phi);
+
+     delta_phi[XX]=mc_move->group[MC_ANGLES].value/2;
+     //delta_phi[XX]=-0.000003;
+
+     list[nr++]=ak;
+
+     for(k=0;k<nr;k++) {
+      al=list[k];
+      rvec_sub(x[al],x[aj],r_lj);
+      mvmul(basis_inv,r_lj,r1);
+      rand_rot_mc(r1,xrot,delta_phi,xcm);
+      for(i=0;i<DIM;i++)
+       r1[i]=xrot[i];
+      mvmul(basis,r1,r2);
+      rvec_add(x[aj],r2,x[al]);
+     }
+
+     nr = 0;
+     bond_rot(graph,aj,ai,list_r,&nr,-1);
+     list=list_r;
+
+     clear_rvec(delta_phi);
+     delta_phi[XX]=-mc_move->group[MC_ANGLES].value/2;
+     //delta_phi[XX]=0.000003;
+
+     list[nr++]=ai;
+
+     for(k=0;k<nr;k++) {
+      al=list[k];
+      rvec_sub(x[al],x[aj],r_lj);
+      mvmul(basis_inv,r_lj,r1);
+      rand_rot_mc(r1,xrot,delta_phi,xcm);
+      for(i=0;i<DIM;i++)
+       r1[i]=xrot[i];
+      mvmul(basis,r1,r2);
+      rvec_add(x[aj],r2,x[al]);
+     }
+}
+
+void set_mcmove(gmx_mc_movegroup *group,gmx_rng_t rng,real fac,int delta,int start,int i)
+{
+ int a;
+ group->value = fac;
+ group->ai = start + (group->ilist)->iatoms[delta*i];
+ group->aj = start + (group->ilist)->iatoms[delta*i+1];
+ group->bmove=TRUE;
+
+ if(delta == 3) {
+  group->ak = start + (group->ilist)->iatoms[delta*i+2];
+  if(uniform_int(rng,2))
+  {
+  /* a = group->ai;
+   group->ai = group->ak;
+   group->ak = a;*/
+  }
+ }
+ else 
+ {
+  if(uniform_int(rng,2))
+  {
+  /* a = group->ai;
+   group->ai = group->aj;
+   group->aj = a;*/
+  }
+ }
+}
 void update(FILE         *fplog,
 	    int          step,
             real         *dvdlambda,    /* FEP stuff */

@@ -93,6 +93,45 @@ typedef struct
 }
 energyhistory_t;
 
+typedef struct
+{
+ int ai;
+ int aj;
+ int ak;
+ int *list; /* list[nr] of atoms to be rotated */
+ t_ilist *ilist;
+ bool bmove;
+ real value;
+} gmx_mc_movegroup;
+
+typedef struct
+{
+ int start;
+ int end;
+ int nr;
+ int cgs;
+ int cgsnr;
+ int homenr;
+ int *cgindex;
+ rvec delta_x;
+ rvec delta_phi;
+ real delta_v;
+ bool update_box;
+ bool n_mc;
+ gmx_mc_movegroup *group;
+ int mvgroup;
+ int mol;
+ int nbtype;
+ int *sum_index;
+ bool *bNS;
+ rvec *xprev;
+ rvec *xcm;
+ real **enerd;
+ real **enerd_prev;
+ real bias;
+ real gauss; //teste
+ real d2; //teste
+} gmx_mc_move;
 
 typedef struct
 {

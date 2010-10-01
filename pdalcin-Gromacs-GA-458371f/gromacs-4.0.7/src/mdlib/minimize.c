@@ -92,17 +92,6 @@ typedef struct {
   int     a_fmax;
 } em_state_t;
 
-typedef struct
-{
- int ai;
- int aj;
- int ak;
- int *list; /* list[nr] of atoms to be rotated */
- t_ilist *ilist;
- bool bmove;
- real value;
-} gmx_movegroup;
-
 
 typedef struct
 {
@@ -829,19 +818,22 @@ static void do_ga_crossover2(char *dna1, char *dna2)
                   
 }
  
-static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, FILE *fplog,t_commrec *cr,t_graph *graph)
+static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, FILE *fplog,t_commrec *cr,t_graph *graph,gmx_mc_move *mc_move,gmx_rng_t rng)
 {
 	int i, selAtm, selCord;;
     int j;
 	t_state *t;
 	rvec *x1;
     char binString1[FP2BIN_STRING_MAX];
-    real teste;
+    real coord,newcoord,delta;
+    rvec v;
+    int ii,jj;
 	
 	t = &e->s;
 	x1 = t->x;
 
-	for(i = start; i < end ; i++)
+
+/*	for(i = start; i < end ; i++)
 	{
 		
         selAtm = (rand() % md->homenr) + start;
@@ -849,12 +841,30 @@ static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, F
         teste = x1[selAtm][selCord];
         fp2bin(x1[selAtm][selCord],binString1);
   
-        do_ga_mutation(binString1,2,1);
+        do_ga_mutation(binString1,1,1);
         
         x1[selAtm][selCord] = (real)bin2fp(binString1);
-        printf("diff %f\n",fabs(teste-x1[selAtm][selCord]));
-	}
+        printf("diff %10.10f\n",fabs(teste-x1[selAtm][selCord]));
+	}*/
 
+        for(ii=0;ii<(mc_move->group[MC_BONDS].ilist->nr/2);ii++)
+        {
+         rvec_sub(x1[ii+1],x1[ii],v);
+         coord = norm(v);
+         fp2bin(coord,binString1);
+  
+         do_ga_mutation(binString1,1,1);
+
+         newcoord = (real)bin2fp(binString1);
+         delta = 1e-2*(newcoord - coord);
+         printf("delta %f\n",delta);
+         set_mcmove(&(mc_move->group[MC_BONDS]),rng,delta,2,start,ii);
+         stretch_bonds(x1,mc_move,graph);
+        }
+
+ /*    rotate_dihedral(x,mc_move,graph);
+     stretch_bonds(x,mc_move,graph);
+     bend_angles(x,mc_move,graph);*/
 }
 
 static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
@@ -913,7 +923,7 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
   fp2bin(x1[selAtm][selCord],binString1);
   fp2bin(x2[selAtm][selCord],binString2);
   if(selProcess == 0)
-	do_ga_mutation(binString1,2,1);
+	do_ga_mutation(binString1,1,1);
   else
     if(cross == 1)
     	do_ga_crossover(binString1, binString2);
@@ -2618,8 +2628,11 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   int    count=0; 
   int    steps_accepted=0; 
   int    populationSize;
+  gmx_mc_move *mc_move;
   /* not used */
   real   terminate=0;
+  int seed;
+  gmx_rng_t rng;
   
   /* GA */
   int cross;
@@ -2635,6 +2648,10 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   em_state_t *s_father,*s_mother;
   em_state_t **s_pop;
   em_state_t *s_min;
+
+       seed = make_seed();
+       rng=gmx_rng_init(seed);
+
   
   int compare(const void * a, const void * b)
   {
@@ -2646,6 +2663,8 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   //cross = 50;
   //generations = 100;
 
+  snew(mc_move,1);
+  snew(mc_move->group,MC_NR);
 
   s_father = init_em_state();
   s_mother = init_em_state();
@@ -2659,9 +2678,10 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 
       graph = mk_graph(fplog,&(top->idef),0,top_global->natoms,FALSE,FALSE);
 
-   /*mc_move->group[MC_BONDS].ilist = &top_global->moltype[0].mc_bonds;
+   mc_move->group[MC_BONDS].ilist = &top_global->moltype[0].mc_bonds;
    mc_move->group[MC_ANGLES].ilist = &top_global->moltype[0].mc_angles;
-   mc_move->group[MC_DIHEDRALS].ilist = &top_global->moltype[0].mc_dihedrals;*/
+   mc_move->group[MC_DIHEDRALS].ilist = &top_global->moltype[0].mc_dihedrals;
+
 
   /* Print to log file  */
   start_t=print_date_and_time(fplog,cr->nodeid,"Started Genetic Algorithm");
@@ -2732,7 +2752,7 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   	s_pop[popCount]->s.natoms = s_father->s.natoms;
   	s_pop[popCount]->s.lambda = s_father->s.lambda;
 
-	do_ga_randomizer(s_pop[popCount], start, end, mdatoms,fplog, cr,graph);
+	do_ga_randomizer(s_pop[popCount], start, end, mdatoms,fplog, cr,graph,mc_move,rng);
 
   }
 
@@ -2826,6 +2846,11 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 
 	s_min = s_pop[do_ga_min(populationSize, pop_energy)];
     
+    evaluate_energy(fplog,bVerbose,cr,
+		    state_global,top_global,s_min,&buf,top,
+		    inputrec,nrnb,wcycle,
+		    vsite,constr,fcd,graph,mdatoms,fr,
+		    mu_tot,enerd,vir,pres,count,count==0);
     if (MASTER(cr))
       print_ebin_header(fplog,count,count,s_pop[cand1]->s.lambda);
     
@@ -2850,12 +2875,15 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 	upd_mdebin(mdebin,NULL,TRUE,mdatoms->tmass,count,(real)count,
 		   enerd,&s_min->s,s_min->s.box,
 		   NULL,NULL,vir,pres,NULL,mu_tot,constr);
-	/*print_ebin(fp_ene,TRUE,
-		   do_per_step(steps_accepted,inputrec->nstdisreout),
-		   do_per_step(steps_accepted,inputrec->nstorireout),
+	print_ebin(fp_ene,TRUE,
+		   TRUE,
+		   TRUE,
 		   fplog,count,count,count,eprNORMAL,TRUE,
-		   mdebin,fcd,&(top_global->groups),&(inputrec->opts));*/
+		   mdebin,fcd,&(top_global->groups),&(inputrec->opts));
 	fflush(fplog);
+      write_em_traj(fplog,cr,fp_trn,TRUE,FALSE,NULL,
+		    top_global,inputrec,count,
+		    s_min,state_global,f_global);
       
     } 
     

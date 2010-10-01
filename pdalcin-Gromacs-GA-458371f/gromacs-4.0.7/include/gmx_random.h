@@ -98,6 +98,7 @@ gmx_rng_init(unsigned int seed);
 unsigned int
 gmx_rng_make_seed(void);
 
+int uniform_int(gmx_rng_t rng,int max);
 
 /*! \brief Initialize a RNG with 624 integers (>32 bits of entropy).
  *

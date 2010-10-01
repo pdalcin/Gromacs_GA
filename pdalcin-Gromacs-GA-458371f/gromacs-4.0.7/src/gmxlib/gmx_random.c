@@ -70,6 +70,16 @@ gmx_rng_init(unsigned int seed)
   return rng;
 }
 
+int uniform_int(gmx_rng_t rng,int max)
+{
+ int ii;
+ do {
+  ii=(int)(gmx_rng_uniform_real(rng)*max);
+ } while(ii >= max);
+ return ii;
+}
+
+
 gmx_rng_t 
 gmx_rng_init_array(unsigned int seed[], int seed_length)
 {

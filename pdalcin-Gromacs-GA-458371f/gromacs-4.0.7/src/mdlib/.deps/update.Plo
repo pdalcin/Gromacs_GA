@@ -67,7 +67,7 @@ update.lo: update.c ../../src/config.h /usr/include/stdio.h \
  ../../include/types/state.h ../../include/vcm.h ../../include/update.h \
  ../../include/copyrite.h ../../include/constr.h ../../include/edsam.h \
  ../../include/pull.h ../../include/disre.h ../../include/orires.h \
- ../../include/gmx_wallcycle.h
+ ../../include/gmx_wallcycle.h ../../include/3dview.h
 
 ../../src/config.h:
 
@@ -372,3 +372,5 @@ update.lo: update.c ../../src/config.h /usr/include/stdio.h \
 ../../include/orires.h:
 
 ../../include/gmx_wallcycle.h:
+
+../../include/3dview.h:

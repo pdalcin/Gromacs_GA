@@ -66,6 +66,14 @@ extern void set_stochd_state(gmx_stochd_t sd,t_state *state);
  */
 extern void set_deform_reference_box(int step,matrix box);
 
+void bond_rot(t_graph *graph,int ai,int aj,int *list,int *nr,int afix);
+
+void set_mcmove(gmx_mc_movegroup *group,gmx_rng_t rng,real fac,int delta,int start,int eI);
+
+void stretch_bonds(rvec *x,gmx_mc_move *mc_move,t_graph *graph);
+void bend_angles(rvec *x,gmx_mc_move *mc_move,t_graph *graph);
+void rotate_dihedral(rvec *x,gmx_mc_move *mc_move,t_graph *graph);
+
 extern void update(FILE         *fplog,
 		   int          step,
 		   real         *dvdlambda, /* FEP stuff */

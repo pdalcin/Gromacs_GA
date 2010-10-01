@@ -1,6 +1,6 @@
 sgetrf.lo: sgetrf.c ../../../include/gmx_blas.h ../../../src/config.h \
-  ../../../include/types/simple.h ../../../include/gmx_lapack.h \
-  lapack_limits.h
+ ../../../include/types/simple.h ../../../include/gmx_lapack.h \
+ lapack_limits.h
 
 ../../../include/gmx_blas.h:
 

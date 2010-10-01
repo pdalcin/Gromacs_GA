@@ -11,9 +11,9 @@
 #
 
 # Variables set by the configuration script:
-LIBS         = -lmd -lgmx -lnsl -lfftw3f -lm   
-LDFLAGS      = -L/usr/local/gromacs/lib   
-CFLAGS	     = -O3 -fomit-frame-pointer -finline-functions -Wall -Wno-unused -funroll-all-loops  -I/usr/local/gromacs/include -I/usr/local/gromacs/include/gromacs	
+LIBS         = -lmd -lgmx -lxml2  -lnsl -lfftw3f -lm   -lSM -lICE -lX11   
+LDFLAGS      = -L/home/andre/ga/lib   
+CFLAGS	     = -O3 -fomit-frame-pointer -finline-functions -Wall -Wno-unused -funroll-all-loops   -I/usr/include/libxml2 -I/home/andre/ga/include -I/home/andre/ga/include/gromacs	
 CC           = cc
 LD           = $(CC)
 

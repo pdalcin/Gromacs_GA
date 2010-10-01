@@ -1,5 +1,5 @@
 slasrt2.lo: slasrt2.c ../../../include/gmx_lapack.h ../../../src/config.h \
-  ../../../include/types/simple.h
+ ../../../include/types/simple.h
 
 ../../../include/gmx_lapack.h:
 

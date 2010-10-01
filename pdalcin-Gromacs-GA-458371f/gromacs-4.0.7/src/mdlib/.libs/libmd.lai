@@ -5,16 +5,16 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libmd.so.5'
+dlname=''
 
 # Names of this library.
-library_names='libmd.so.5.0.0 libmd.so.5 libmd.so'
+library_names=''
 
 # The name of the static archive.
 old_library='libmd.a'
 
 # Libraries that this one depends upon.
-dependency_libs=' /usr/local/gromacs/lib/libgmx.la -lnsl -lfftw3f -lm'
+dependency_libs=' /home/andre/ga/lib/libgmx.la /usr/lib/libxml2.la -lnsl /usr/lib/libfftw3f.la -lm -lSM -lICE -lX11'
 
 # Version information for libmd.
 current=5
@@ -32,4 +32,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/usr/local/gromacs/lib'
+libdir='/home/andre/ga/lib'

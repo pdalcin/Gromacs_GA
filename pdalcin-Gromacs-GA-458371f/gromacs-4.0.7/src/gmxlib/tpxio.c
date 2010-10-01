@@ -1410,6 +1410,10 @@ static void do_moltype(gmx_moltype_t *molt,bool bRead,t_symtab *symtab,
   if (file_version >= 57) {
     do_ilists(molt->ilist,bRead,file_version);
 
+    do_ilist(&molt->mc_bonds,bRead,file_version,F_BONDS);
+    do_ilist(&molt->mc_angles,bRead,file_version,F_ANGLES);
+    do_ilist(&molt->mc_dihedrals,bRead,file_version,F_PDIHS);
+
     do_block(&molt->cgs,bRead,file_version);
     if (bRead && gmx_debug_at) {
       pr_block(debug,0,"cgs",&molt->cgs,TRUE);

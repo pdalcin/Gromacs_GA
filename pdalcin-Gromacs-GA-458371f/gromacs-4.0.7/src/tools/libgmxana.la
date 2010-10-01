@@ -5,16 +5,16 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libgmxana.so.5'
+dlname=''
 
 # Names of this library.
-library_names='libgmxana.so.5.0.0 libgmxana.so.5 libgmxana.so'
+library_names=''
 
 # The name of the static archive.
 old_library='libgmxana.a'
 
 # Libraries that this one depends upon.
-dependency_libs=' /home/pdalcin/Desktop/Gromacs_GA/pdalcin-Gromacs-GA-458371f/gromacs-4.0.7/src/mdlib/libmd.la /home/pdalcin/Desktop/Gromacs_GA/pdalcin-Gromacs-GA-458371f/gromacs-4.0.7/src/gmxlib/libgmx.la -lnsl -lfftw3f -lm'
+dependency_libs=' /home/andre/GA/Gromacs_GA/pdalcin-Gromacs-GA-458371f/gromacs-4.0.7/src/mdlib/libmd.la /home/andre/GA/Gromacs_GA/pdalcin-Gromacs-GA-458371f/gromacs-4.0.7/src/gmxlib/libgmx.la /usr/lib/gcc/i486-linux-gnu/4.4.3/../../../../lib//libxml2.la -lnsl /usr/lib/gcc/i486-linux-gnu/4.4.3/../../../../lib//libfftw3f.la -lm -lSM -lICE -lX11'
 
 # Version information for libgmxana.
 current=5
@@ -32,5 +32,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/usr/local/gromacs/lib'
-relink_command="(cd /home/pdalcin/Desktop/Gromacs_GA/pdalcin-Gromacs-GA-458371f/gromacs-4.0.7/src/tools; /bin/bash ../../libtool  --tag=CC --mode=relink cc -O3 -fomit-frame-pointer -finline-functions -Wall -Wno-unused -funroll-all-loops -version-info 5:0:0 -o libgmxana.la -rpath /usr/local/gromacs/lib autocorr.lo expfit.lo polynomials.lo levenmar.lo anadih.lo pp2shift.lo dlist.lo eigio.lo lsq.lo cmat.lo eigensolver.lo nsc.lo hxprops.lo fitahx.lo gmx_analyze.lo gmx_anaeig.lo gmx_angle.lo gmx_bond.lo gmx_bundle.lo gmx_chi.lo gmx_cluster.lo gmx_confrms.lo gmx_covar.lo gmx_current.lo gmx_density.lo gmx_densmap.lo gmx_dih.lo gmx_dielectric.lo gmx_kinetics.lo gmx_spatial.lo gmx_dipoles.lo gmx_disre.lo gmx_dist.lo gmx_dyndom.lo gmx_enemat.lo gmx_energy.lo gmx_lie.lo gmx_filter.lo gmx_gyrate.lo gmx_h2order.lo gmx_hbond.lo gmx_helix.lo gmx_mindist.lo gmx_msd.lo gmx_morph.lo gmx_nmeig.lo gmx_nmens.lo gmx_order.lo gmx_principal.lo gmx_polystat.lo gmx_potential.lo gmx_rama.lo gmx_rdf.lo gmx_rms.lo gmx_rmsdist.lo gmx_rmsf.lo gmx_rotacf.lo gmx_saltbr.lo gmx_sas.lo gmx_sdf.lo gmx_sgangle.lo gmx_sorient.lo gmx_spol.lo gmx_tcaf.lo gmx_traj.lo gmx_velacc.lo gmx_helixorient.lo gmx_clustsize.lo gmx_mdmat.lo gmx_wham.lo correl.lo gmx_sham.lo gmx_nmtraj.lo gmx_trjconv.lo gmx_trjcat.lo gmx_trjorder.lo gmx_xpm2ps.lo gmx_editconf.lo gmx_genbox.lo gmx_genion.lo gmx_genconf.lo gmx_genpr.lo gmx_eneconv.lo gmx_vanhove.lo gmx_wheel.lo addconf.lo calcpot.lo edittop.lo ../gmxlib/libgmx.la ../mdlib/libmd.la -lnsl -lfftw3f -lm @inst_prefix_dir@) "
+libdir='/home/andre/ga/lib'

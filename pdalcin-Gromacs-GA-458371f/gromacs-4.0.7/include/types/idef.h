@@ -124,6 +124,19 @@ enum {
   F_DGDL_CON,
   F_NRE		/* This number is for the total number of energies	*/
 };
+
+enum {
+MC_TRANSLATE,
+MC_ROTATEX,
+MC_ROTATEY,
+MC_ROTATEZ,
+MC_BONDS,
+MC_ANGLES,
+MC_DIHEDRALS,
+MC_CRA,
+MC_NR
+};
+
   
 typedef union
 {

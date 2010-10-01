@@ -36,10 +36,10 @@ MANPATH=$tmppath
 # things in separate vars, so we can remove them later.
 # If you move gromacs, change the next four line.
 ##########################################################
-export GMXBIN=/usr/local/gromacs/bin
-export GMXLDLIB=/usr/local/gromacs/lib
-export GMXMAN=/usr/local/gromacs/share/man
-export GMXDATA=/usr/local/gromacs/share
+export GMXBIN=/home/andre/ga/bin
+export GMXLDLIB=/home/andre/ga/lib
+export GMXMAN=/home/andre/ga/share/man
+export GMXDATA=/home/andre/ga/share
 	
 # NB: The variables already begin with ':' now, or are empty
 export LD_LIBRARY_PATH=${GMXLDLIB}${LD_LIBRARY_PATH}

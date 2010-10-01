@@ -1,35 +1,38 @@
 nb_kernel.lo: nb_kernel.c /usr/include/stdio.h /usr/include/features.h \
-  /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
-  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h \
-  /usr/lib/gcc/i486-linux-gnu/4.3.3/include/stddef.h \
-  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
-  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
-  /usr/lib/gcc/i486-linux-gnu/4.3.3/include/stdarg.h \
-  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
-  /usr/include/bits/stdio.h /usr/include/bits/stdio2.h \
-  ../../../../include/types/nrnb.h ../../../../src/config.h \
-  ../nb_kerneltype.h ../../../../include/types/simple.h nb_kernel.h \
-  nb_kernel010.h nb_kernel020.h nb_kernel030.h nb_kernel100.h \
-  nb_kernel101.h nb_kernel102.h nb_kernel103.h nb_kernel104.h \
-  nb_kernel110.h nb_kernel111.h nb_kernel112.h nb_kernel113.h \
-  nb_kernel114.h nb_kernel120.h nb_kernel121.h nb_kernel122.h \
-  nb_kernel123.h nb_kernel124.h nb_kernel130.h nb_kernel131.h \
-  nb_kernel132.h nb_kernel133.h nb_kernel134.h nb_kernel200.h \
-  nb_kernel201.h nb_kernel202.h nb_kernel203.h nb_kernel204.h \
-  nb_kernel210.h nb_kernel211.h nb_kernel212.h nb_kernel213.h \
-  nb_kernel214.h nb_kernel220.h nb_kernel221.h nb_kernel222.h \
-  nb_kernel223.h nb_kernel224.h nb_kernel230.h nb_kernel231.h \
-  nb_kernel232.h nb_kernel233.h nb_kernel234.h nb_kernel300.h \
-  nb_kernel301.h nb_kernel302.h nb_kernel303.h nb_kernel304.h \
-  nb_kernel310.h nb_kernel311.h nb_kernel312.h nb_kernel313.h \
-  nb_kernel314.h nb_kernel320.h nb_kernel321.h nb_kernel322.h \
-  nb_kernel323.h nb_kernel324.h nb_kernel330.h nb_kernel331.h \
-  nb_kernel332.h nb_kernel333.h nb_kernel334.h nb_kernel400.h \
-  nb_kernel410.h nb_kernel420.h nb_kernel430.h
+ /usr/include/bits/predefs.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-32.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include/stddef.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h /usr/include/bits/stdio2.h \
+ ../../../../include/types/nrnb.h ../../../../src/config.h \
+ ../nb_kerneltype.h ../../../../include/types/simple.h nb_kernel.h \
+ nb_kernel010.h nb_kernel020.h nb_kernel030.h nb_kernel100.h \
+ nb_kernel101.h nb_kernel102.h nb_kernel103.h nb_kernel104.h \
+ nb_kernel110.h nb_kernel111.h nb_kernel112.h nb_kernel113.h \
+ nb_kernel114.h nb_kernel120.h nb_kernel121.h nb_kernel122.h \
+ nb_kernel123.h nb_kernel124.h nb_kernel130.h nb_kernel131.h \
+ nb_kernel132.h nb_kernel133.h nb_kernel134.h nb_kernel200.h \
+ nb_kernel201.h nb_kernel202.h nb_kernel203.h nb_kernel204.h \
+ nb_kernel210.h nb_kernel211.h nb_kernel212.h nb_kernel213.h \
+ nb_kernel214.h nb_kernel220.h nb_kernel221.h nb_kernel222.h \
+ nb_kernel223.h nb_kernel224.h nb_kernel230.h nb_kernel231.h \
+ nb_kernel232.h nb_kernel233.h nb_kernel234.h nb_kernel300.h \
+ nb_kernel301.h nb_kernel302.h nb_kernel303.h nb_kernel304.h \
+ nb_kernel310.h nb_kernel311.h nb_kernel312.h nb_kernel313.h \
+ nb_kernel314.h nb_kernel320.h nb_kernel321.h nb_kernel322.h \
+ nb_kernel323.h nb_kernel324.h nb_kernel330.h nb_kernel331.h \
+ nb_kernel332.h nb_kernel333.h nb_kernel334.h nb_kernel400.h \
+ nb_kernel410.h nb_kernel420.h nb_kernel430.h
 
 /usr/include/stdio.h:
 
 /usr/include/features.h:
+
+/usr/include/bits/predefs.h:
 
 /usr/include/sys/cdefs.h:
 
@@ -39,7 +42,7 @@ nb_kernel.lo: nb_kernel.c /usr/include/stdio.h /usr/include/features.h \
 
 /usr/include/gnu/stubs-32.h:
 
-/usr/lib/gcc/i486-linux-gnu/4.3.3/include/stddef.h:
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -51,7 +54,7 @@ nb_kernel.lo: nb_kernel.c /usr/include/stdio.h /usr/include/features.h \
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/i486-linux-gnu/4.3.3/include/stdarg.h:
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 

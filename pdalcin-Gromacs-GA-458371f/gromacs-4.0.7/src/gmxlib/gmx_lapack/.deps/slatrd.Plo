@@ -1,15 +1,18 @@
 slatrd.lo: slatrd.c /usr/include/ctype.h /usr/include/features.h \
-  /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
-  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h \
-  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
-  /usr/include/endian.h /usr/include/bits/endian.h \
-  /usr/include/bits/byteswap.h ../../../include/gmx_blas.h \
-  ../../../src/config.h ../../../include/types/simple.h \
-  ../../../include/gmx_lapack.h lapack_limits.h
+ /usr/include/bits/predefs.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-32.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/xlocale.h ../../../include/gmx_blas.h ../../../src/config.h \
+ ../../../include/types/simple.h ../../../include/gmx_lapack.h \
+ lapack_limits.h
 
 /usr/include/ctype.h:
 
 /usr/include/features.h:
+
+/usr/include/bits/predefs.h:
 
 /usr/include/sys/cdefs.h:
 
@@ -28,6 +31,8 @@ slatrd.lo: slatrd.c /usr/include/ctype.h /usr/include/features.h \
 /usr/include/bits/endian.h:
 
 /usr/include/bits/byteswap.h:
+
+/usr/include/xlocale.h:
 
 ../../../include/gmx_blas.h:
 

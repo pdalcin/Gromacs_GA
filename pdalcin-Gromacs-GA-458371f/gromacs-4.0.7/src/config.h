@@ -2,13 +2,13 @@
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Hardware and OS version for build host */
-#define BUILD_MACHINE "Linux 2.6.28-19-generic i686"
+#define BUILD_MACHINE "Linux 2.6.32-21-generic i686"
 
 /* Date and time for build */
-#define BUILD_TIME "Fri Sep 24 15:02:00 BRT 2010"
+#define BUILD_TIME "Fri Oct  1 10:49:07 BRT 2010"
 
 /* User doing build */
-#define BUILD_USER "root@blackmesa"
+#define BUILD_USER "andre@andre-laptop"
 
 /* Turn off water-water neighborlist optimization only */
 /* #undef DISABLE_WATERWATER_NLIST */
@@ -176,10 +176,10 @@
 #define HAVE_LIBNSL 1
 
 /* Define to 1 if you have the `xml2' library (-lxml2). */
-/* #undef HAVE_LIBXML2 */
+#define HAVE_LIBXML2 1
 
 /* Define to 1 if you have the <libxml/parser.h> header file. */
-/* #undef HAVE_LIBXML_PARSER_H */
+#define HAVE_LIBXML_PARSER_H 1
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
@@ -281,7 +281,7 @@
 /* #undef WITH_DMALLOC */
 
 /* Define to 1 if the X Window System is missing or not being used. */
-#define X_DISPLAY_MISSING 1
+/* #undef X_DISPLAY_MISSING */
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #define _FILE_OFFSET_BITS 64

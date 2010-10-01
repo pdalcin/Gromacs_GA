@@ -38,10 +38,10 @@ setenv MANPATH $tmppath
 # things in separate vars, so we can remove them later.
 # If you move gromacs, change the next four line.
 ##########################################################
-setenv GMXBIN /usr/local/gromacs/bin
-setenv GMXLDLIB /usr/local/gromacs/lib
-setenv GMXMAN /usr/local/gromacs/share/man
-setenv GMXDATA /usr/local/gromacs/share
+setenv GMXBIN /home/andre/ga/bin
+setenv GMXLDLIB /home/andre/ga/lib
+setenv GMXMAN /home/andre/ga/share/man
+setenv GMXDATA /home/andre/ga/share
 
 # old variables begin with ':' now, or are empty.
 setenv PATH ${GMXBIN}${PATH}

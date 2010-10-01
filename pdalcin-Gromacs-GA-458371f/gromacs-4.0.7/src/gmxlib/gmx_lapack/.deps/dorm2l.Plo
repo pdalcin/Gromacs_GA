@@ -1,5 +1,5 @@
 dorm2l.lo: dorm2l.c ../../../include/gmx_lapack.h ../../../src/config.h \
-  ../../../include/types/simple.h
+ ../../../include/types/simple.h
 
 ../../../include/gmx_lapack.h:
 

@@ -5,16 +5,16 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libgmxana.so.5'
+dlname=''
 
 # Names of this library.
-library_names='libgmxana.so.5.0.0 libgmxana.so.5 libgmxana.so'
+library_names=''
 
 # The name of the static archive.
 old_library='libgmxana.a'
 
 # Libraries that this one depends upon.
-dependency_libs=' /usr/local/gromacs/lib/libmd.la /usr/local/gromacs/lib/libgmx.la -lnsl -lfftw3f -lm'
+dependency_libs=' /home/andre/ga/lib/libmd.la /home/andre/ga/lib/libgmx.la /usr/lib/libxml2.la -lnsl /usr/lib/libfftw3f.la -lm -lSM -lICE -lX11'
 
 # Version information for libgmxana.
 current=5
@@ -32,4 +32,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/usr/local/gromacs/lib'
+libdir='/home/andre/ga/lib'

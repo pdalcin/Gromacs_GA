@@ -5,16 +5,16 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libgmx.so.5'
+dlname=''
 
 # Names of this library.
-library_names='libgmx.so.5.0.0 libgmx.so.5 libgmx.so'
+library_names=''
 
 # The name of the static archive.
 old_library='libgmx.a'
 
 # Libraries that this one depends upon.
-dependency_libs=' -lnsl -lfftw3f -lm'
+dependency_libs=' /usr/lib/libxml2.la -lnsl /usr/lib/libfftw3f.la -lm -lSM -lICE -lX11'
 
 # Version information for libgmx.
 current=5
@@ -32,4 +32,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/usr/local/gromacs/lib'
+libdir='/home/andre/ga/lib'

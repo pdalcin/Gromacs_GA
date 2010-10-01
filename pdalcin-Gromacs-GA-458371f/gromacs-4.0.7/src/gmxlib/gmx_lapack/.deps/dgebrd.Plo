@@ -1,6 +1,6 @@
 dgebrd.lo: dgebrd.c ../../../include/gmx_lapack.h ../../../src/config.h \
-  ../../../include/types/simple.h ../../../include/gmx_blas.h \
-  lapack_limits.h
+ ../../../include/types/simple.h ../../../include/gmx_blas.h \
+ lapack_limits.h
 
 ../../../include/gmx_lapack.h:
 

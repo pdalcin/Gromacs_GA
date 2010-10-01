@@ -5,7 +5,7 @@
 # It is necessary for linking the library.
 
 # Name of the PIC object.
-pic_object='.libs/slar1vx.o'
+pic_object=none
 
 # Name of the non-PIC object.
 non_pic_object='slar1vx.o'

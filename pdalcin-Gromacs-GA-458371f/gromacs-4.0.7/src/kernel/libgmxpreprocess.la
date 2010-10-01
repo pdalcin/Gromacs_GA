@@ -14,12 +14,12 @@ library_names=''
 old_library='libgmxpreprocess.a'
 
 # Libraries that this one depends upon.
-dependency_libs=' -lnsl -lfftw3f -lm'
+dependency_libs=' /usr/lib/gcc/i486-linux-gnu/4.4.3/../../../../lib//libxml2.la -lnsl /usr/lib/gcc/i486-linux-gnu/4.4.3/../../../../lib//libfftw3f.la -lm -lSM -lICE -lX11'
 
 # Version information for libgmxpreprocess.
-current=
-age=
-revision=
+current=5
+age=2
+revision=4
 
 # Is this an already installed library?
 installed=no

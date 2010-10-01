@@ -94,6 +94,18 @@ typedef struct {
 
 typedef struct
 {
+ int ai;
+ int aj;
+ int ak;
+ int *list; /* list[nr] of atoms to be rotated */
+ t_ilist *ilist;
+ bool bmove;
+ real value;
+} gmx_movegroup;
+
+
+typedef struct
+{
     real energy;
     int index;
 }em_av;
@@ -689,10 +701,19 @@ int do_ga_min(int size, real *energyList)
 	return minIndex;
 }
  
-static void do_ga_mutation(char *dna)
+static void do_ga_mutation(char *dna,int min, int max)
 {
 	int cromo,point;
-	
+	int l;
+        int i;
+	l = -1;
+    for(i = 0; i < strlen(dna); i++)
+    {
+	if(dna[i] == '.')
+		l = i;
+    }
+    if(l == -1)
+    {
     do{
     point = 0;
 	cromo = rand() % strlen(dna);
@@ -705,6 +726,27 @@ static void do_ga_mutation(char *dna)
         else
             point = 1;
     }while(point == 0);
+    }
+    else
+    {
+    
+    do{
+    point = 0;
+	if((l+min) > strlen(dna))
+		cromo = rand() % (l+min-max);
+	else
+		cromo = rand() % strlen(dna);
+	cromo += max;	
+
+	if(dna[cromo] == '1')
+		dna[cromo] = '0';
+	else
+	    if(dna[cromo] == '0')
+		    dna[cromo] = '1';
+        else
+            point = 1;
+    }while(point == 0);
+    }
 }
 
 static void do_ga_crossover(char *dna1, char *dna2)
@@ -787,13 +829,14 @@ static void do_ga_crossover2(char *dna1, char *dna2)
                   
 }
  
-static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, FILE *fplog,t_commrec *cr)
+static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, FILE *fplog,t_commrec *cr,t_graph *graph)
 {
 	int i, selAtm, selCord;;
     int j;
 	t_state *t;
 	rvec *x1;
     char binString1[FP2BIN_STRING_MAX];
+    real teste;
 	
 	t = &e->s;
 	x1 = t->x;
@@ -803,11 +846,13 @@ static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, F
 		
         selAtm = (rand() % md->homenr) + start;
         selCord = rand() % DIM;
+        teste = x1[selAtm][selCord];
         fp2bin(x1[selAtm][selCord],binString1);
   
-        do_ga_mutation(binString1);
+        do_ga_mutation(binString1,2,1);
         
         x1[selAtm][selCord] = (real)bin2fp(binString1);
+        printf("diff %f\n",fabs(teste-x1[selAtm][selCord]));
 	}
 
 }
@@ -868,7 +913,7 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
   fp2bin(x1[selAtm][selCord],binString1);
   fp2bin(x2[selAtm][selCord],binString2);
   if(selProcess == 0)
-	do_ga_mutation(binString1);
+	do_ga_mutation(binString1,2,1);
   else
     if(cross == 1)
     	do_ga_crossover(binString1, binString2);
@@ -2612,6 +2657,12 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 	  nrnb,mu_tot,fr,&enerd,&graph,mdatoms,vsite,constr,
 	  nfile,fnm,&fp_trn,&fp_ene,&mdebin);
 
+      graph = mk_graph(fplog,&(top->idef),0,top_global->natoms,FALSE,FALSE);
+
+   /*mc_move->group[MC_BONDS].ilist = &top_global->moltype[0].mc_bonds;
+   mc_move->group[MC_ANGLES].ilist = &top_global->moltype[0].mc_angles;
+   mc_move->group[MC_DIHEDRALS].ilist = &top_global->moltype[0].mc_dihedrals;*/
+
   /* Print to log file  */
   start_t=print_date_and_time(fplog,cr->nodeid,"Started Genetic Algorithm");
   wallcycle_start(wcycle,ewcRUN);
@@ -2681,7 +2732,7 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   	s_pop[popCount]->s.natoms = s_father->s.natoms;
   	s_pop[popCount]->s.lambda = s_father->s.lambda;
 
-	do_ga_randomizer(s_pop[popCount], start, end, mdatoms,fplog, cr);
+	do_ga_randomizer(s_pop[popCount], start, end, mdatoms,fplog, cr,graph);
 
   }
 

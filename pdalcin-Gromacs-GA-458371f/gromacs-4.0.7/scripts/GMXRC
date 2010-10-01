@@ -22,27 +22,27 @@ if [ "`(echo ${shtst%%.*}) 2>/dev/null`" = A ]; then
     # zsh can test if the variable shtst is set with ${+shtst}
     if [ "`(echo ${+shtst}) 2>/dev/null`" = 1 ]; then
       # shell is zsh
-      source /usr/local/gromacs/bin/GMXRC.zsh
+      source /home/andre/ga/bin/GMXRC.zsh
     else  
       # shell is bash
-      source /usr/local/gromacs/bin/GMXRC.bash      
+      source /home/andre/ga/bin/GMXRC.bash      
     fi
 
   else    
     # shell is ksh - use bash setup, completions won't be read.
-     . /usr/local/gromacs/bin/GMXRC.bash
+     . /home/andre/ga/bin/GMXRC.bash
   fi
   return
 else
   # shell is bsh - use bash setup, completions won't be read.
-  . /usr/local/gromacs/bin/GMXRC.bash
+  . /home/andre/ga/bin/GMXRC.bash
   exit
 fi
 
 # csh/tcsh jump here
 
 CSH:
-source /usr/local/gromacs/bin/GMXRC.csh
+source /home/andre/ga/bin/GMXRC.csh
 
 
 

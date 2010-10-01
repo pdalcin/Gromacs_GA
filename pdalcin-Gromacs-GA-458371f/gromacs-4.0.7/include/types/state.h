@@ -93,6 +93,7 @@ typedef struct
 }
 energyhistory_t;
 
+
 typedef struct
 {
   int           natoms;

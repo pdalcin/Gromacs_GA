@@ -280,6 +280,9 @@ void DS_Init(DirStack **DS)
     set_nec(&(necessary[d_distance_restraints]),d_atoms,d_none);
     set_nec(&(necessary[d_orientation_restraints]),d_atoms,d_none);
     set_nec(&(necessary[d_dihedral_restraints]),d_atoms,d_none);
+    set_nec(&(necessary[d_mcbonds]), d_atoms, d_bonds,d_none);
+    set_nec(&(necessary[d_mcangles]), d_atoms, d_angles,d_none);
+    set_nec(&(necessary[d_mcdihedrals]), d_atoms, d_dihedrals,d_none);
     for(i=0; (i<d_maxdir); i++) {
       if (debug)
 	fprintf(debug,"%20s:  ",dir2str((directive)i));

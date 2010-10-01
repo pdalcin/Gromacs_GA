@@ -1,44 +1,44 @@
 nb_kernel_ia32_sse.lo: nb_kernel_ia32_sse.c ../../../../src/config.h \
-  ../../../../include/gmx_thread.h /usr/include/stdio.h \
-  /usr/include/features.h /usr/include/sys/cdefs.h \
-  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
-  /usr/include/gnu/stubs-32.h \
-  /usr/lib/gcc/i486-linux-gnu/4.3.3/include/stddef.h \
-  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
-  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
-  /usr/lib/gcc/i486-linux-gnu/4.3.3/include/stdarg.h \
-  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
-  /usr/include/bits/stdio.h /usr/include/bits/stdio2.h \
-  ../../../../include/types/simple.h ../../../../include/types/nrnb.h \
-  nb_kernel_ia32_sse.h ../nb_kerneltype.h nb_kernel010_ia32_sse.h \
-  nb_kernel030_ia32_sse.h nb_kernel100_ia32_sse.h nb_kernel101_ia32_sse.h \
-  nb_kernel102_ia32_sse.h nb_kernel103_ia32_sse.h nb_kernel104_ia32_sse.h \
-  nb_kernel110_ia32_sse.h nb_kernel111_ia32_sse.h nb_kernel112_ia32_sse.h \
-  nb_kernel113_ia32_sse.h nb_kernel114_ia32_sse.h nb_kernel130_ia32_sse.h \
-  nb_kernel131_ia32_sse.h nb_kernel132_ia32_sse.h nb_kernel133_ia32_sse.h \
-  nb_kernel134_ia32_sse.h nb_kernel200_ia32_sse.h nb_kernel201_ia32_sse.h \
-  nb_kernel202_ia32_sse.h nb_kernel203_ia32_sse.h nb_kernel204_ia32_sse.h \
-  nb_kernel210_ia32_sse.h nb_kernel211_ia32_sse.h nb_kernel212_ia32_sse.h \
-  nb_kernel213_ia32_sse.h nb_kernel214_ia32_sse.h nb_kernel230_ia32_sse.h \
-  nb_kernel231_ia32_sse.h nb_kernel232_ia32_sse.h nb_kernel233_ia32_sse.h \
-  nb_kernel234_ia32_sse.h nb_kernel300_ia32_sse.h nb_kernel301_ia32_sse.h \
-  nb_kernel302_ia32_sse.h nb_kernel303_ia32_sse.h nb_kernel304_ia32_sse.h \
-  nb_kernel310_ia32_sse.h nb_kernel311_ia32_sse.h nb_kernel312_ia32_sse.h \
-  nb_kernel313_ia32_sse.h nb_kernel314_ia32_sse.h nb_kernel330_ia32_sse.h \
-  nb_kernel331_ia32_sse.h nb_kernel332_ia32_sse.h nb_kernel333_ia32_sse.h \
-  nb_kernel334_ia32_sse.h nb_kernel400_ia32_sse.h nb_kernel410_ia32_sse.h \
-  nb_kernel430_ia32_sse.h /usr/include/stdlib.h /usr/include/sys/types.h \
-  /usr/include/time.h /usr/include/endian.h /usr/include/bits/endian.h \
-  /usr/include/bits/byteswap.h /usr/include/sys/select.h \
-  /usr/include/bits/select.h /usr/include/bits/sigset.h \
-  /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
-  /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
-  /usr/include/bits/stdlib.h /usr/include/signal.h \
-  /usr/include/bits/signum.h /usr/include/bits/siginfo.h \
-  /usr/include/bits/sigaction.h /usr/include/bits/sigcontext.h \
-  /usr/include/bits/sigstack.h /usr/include/bits/sigthread.h \
-  /usr/include/setjmp.h /usr/include/bits/setjmp.h \
-  nb_kernel_ia32_sse_test_asm.h
+ ../../../../include/gmx_thread.h /usr/include/stdio.h \
+ /usr/include/features.h /usr/include/bits/predefs.h \
+ /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include/stddef.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h /usr/include/bits/stdio2.h \
+ ../../../../include/types/simple.h ../../../../include/types/nrnb.h \
+ nb_kernel_ia32_sse.h ../nb_kerneltype.h nb_kernel010_ia32_sse.h \
+ nb_kernel030_ia32_sse.h nb_kernel100_ia32_sse.h nb_kernel101_ia32_sse.h \
+ nb_kernel102_ia32_sse.h nb_kernel103_ia32_sse.h nb_kernel104_ia32_sse.h \
+ nb_kernel110_ia32_sse.h nb_kernel111_ia32_sse.h nb_kernel112_ia32_sse.h \
+ nb_kernel113_ia32_sse.h nb_kernel114_ia32_sse.h nb_kernel130_ia32_sse.h \
+ nb_kernel131_ia32_sse.h nb_kernel132_ia32_sse.h nb_kernel133_ia32_sse.h \
+ nb_kernel134_ia32_sse.h nb_kernel200_ia32_sse.h nb_kernel201_ia32_sse.h \
+ nb_kernel202_ia32_sse.h nb_kernel203_ia32_sse.h nb_kernel204_ia32_sse.h \
+ nb_kernel210_ia32_sse.h nb_kernel211_ia32_sse.h nb_kernel212_ia32_sse.h \
+ nb_kernel213_ia32_sse.h nb_kernel214_ia32_sse.h nb_kernel230_ia32_sse.h \
+ nb_kernel231_ia32_sse.h nb_kernel232_ia32_sse.h nb_kernel233_ia32_sse.h \
+ nb_kernel234_ia32_sse.h nb_kernel300_ia32_sse.h nb_kernel301_ia32_sse.h \
+ nb_kernel302_ia32_sse.h nb_kernel303_ia32_sse.h nb_kernel304_ia32_sse.h \
+ nb_kernel310_ia32_sse.h nb_kernel311_ia32_sse.h nb_kernel312_ia32_sse.h \
+ nb_kernel313_ia32_sse.h nb_kernel314_ia32_sse.h nb_kernel330_ia32_sse.h \
+ nb_kernel331_ia32_sse.h nb_kernel332_ia32_sse.h nb_kernel333_ia32_sse.h \
+ nb_kernel334_ia32_sse.h nb_kernel400_ia32_sse.h nb_kernel410_ia32_sse.h \
+ nb_kernel430_ia32_sse.h /usr/include/stdlib.h /usr/include/sys/types.h \
+ /usr/include/time.h /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/bits/byteswap.h /usr/include/sys/select.h \
+ /usr/include/bits/select.h /usr/include/bits/sigset.h \
+ /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
+ /usr/include/bits/stdlib.h /usr/include/signal.h \
+ /usr/include/bits/signum.h /usr/include/bits/siginfo.h \
+ /usr/include/bits/sigaction.h /usr/include/bits/sigcontext.h \
+ /usr/include/bits/sigstack.h /usr/include/bits/sigthread.h \
+ /usr/include/setjmp.h /usr/include/bits/setjmp.h \
+ /usr/include/bits/setjmp2.h nb_kernel_ia32_sse_test_asm.h
 
 ../../../../src/config.h:
 
@@ -48,6 +48,8 @@ nb_kernel_ia32_sse.lo: nb_kernel_ia32_sse.c ../../../../src/config.h \
 
 /usr/include/features.h:
 
+/usr/include/bits/predefs.h:
+
 /usr/include/sys/cdefs.h:
 
 /usr/include/bits/wordsize.h:
@@ -56,7 +58,7 @@ nb_kernel_ia32_sse.lo: nb_kernel_ia32_sse.c ../../../../src/config.h \
 
 /usr/include/gnu/stubs-32.h:
 
-/usr/lib/gcc/i486-linux-gnu/4.3.3/include/stddef.h:
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -68,7 +70,7 @@ nb_kernel_ia32_sse.lo: nb_kernel_ia32_sse.c ../../../../src/config.h \
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/i486-linux-gnu/4.3.3/include/stdarg.h:
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
@@ -231,5 +233,7 @@ nb_kernel430_ia32_sse.h:
 /usr/include/setjmp.h:
 
 /usr/include/bits/setjmp.h:
+
+/usr/include/bits/setjmp2.h:
 
 nb_kernel_ia32_sse_test_asm.h:

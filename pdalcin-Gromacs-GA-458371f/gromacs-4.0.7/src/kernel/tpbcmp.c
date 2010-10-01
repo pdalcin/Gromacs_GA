@@ -493,7 +493,7 @@ static void cmp_inputrec(FILE *fp,t_inputrec *ir1,t_inputrec *ir2,real ftol)
   cmp_real(fp,"inputrec->dihre_fc",-1,ir1->dihre_fc,ir2->dihre_fc,ftol);
   cmp_real(fp,"inputrec->em_stepsize",-1,ir1->em_stepsize,ir2->em_stepsize,ftol);
   cmp_real(fp,"inputrec->em_tol",-1,ir1->em_tol,ir2->em_tol,ftol);
-  cmp_int(fp,"inputrec->gaPrecision",-1,ir1->gaPrecision,ir2->gaPrecision);
+  cmp_int(fp,"inputrec->gaCross",-1,ir1->gaCross,ir2->gaCross);
   cmp_int(fp,"inputrec->gaGenerations",-1,ir1->gaGenerations,ir2->gaGenerations);
   cmp_int(fp,"inputrec->popSize",-1,ir1->popSize,ir2->popSize);
   cmp_int(fp,"inputrec->niter",-1,ir1->niter,ir2->niter);

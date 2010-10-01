@@ -92,6 +92,12 @@ typedef struct {
   int     a_fmax;
 } em_state_t;
 
+typedef struct
+{
+    real energy;
+    int index;
+}em_av;
+
 static em_state_t *init_em_state()
 {
   em_state_t *ems;
@@ -638,21 +644,32 @@ int ga_BinToInt (int *binnum, int k){
 
 }
 
-int do_ga_addicted_rand(real *e, real energy, int size, FILE *fplog,t_commrec *cr)
+void ga_AvToPer(em_av *av, real EnergyTotal, int size)
 {
-	int i, energy_aux;
+    int i;
+    for(i = 0; i < size; i++)
+        av[i].energy = size - i;
+}
+
+int do_ga_addicted_rand(em_av *e, real energy, int size, FILE *fplog,t_commrec *cr)
+{
+	int i, max;
 	real index, aux;
+    max = 0;
+
+    for(i = 0; i < size; i++)
+        max+=e[i].energy;
+
 	aux = 0;
     index = 0;
-    energy_aux = floor((double)energy);
-	index += rand() % energy_aux;
+	index = rand() % max;
 	for(i = 0; ((i < size) && (aux < index)); i ++)
 	{
-		aux += e[i];
+		aux += e[i].energy;
 	}
 	if(i != 0)
 		i--;
-	return(i);
+	return(e[i].index);
 }
 
 int do_ga_min(int size, real *energyList)
@@ -710,6 +727,65 @@ static void do_ga_crossover(char *dna1, char *dna2)
 	dna1[cromo1] = dna2[cromo1];
 	dna2[cromo2] = dna1[cromo2];
 }
+
+static void do_ga_crossover2(char *dna1, char *dna2)
+{
+	int cromo;
+    int size;
+    int i;
+    int point1, point2;
+    point1 = -1;
+    point2 = -1;
+   
+
+    if(strlen(dna1)<strlen(dna2))
+        size = strlen(dna1);
+    else
+        size = strlen(dna2);
+
+    char aux;
+
+    for(i = 0; i < strlen(dna1); i++)
+        if(dna1[i] == '.')
+            point1 = i;
+
+    for(i = 0; i < strlen(dna2); i++)
+        if(dna2[i] == '.')
+            point2 = i;
+
+    if(point1 == -1)
+        if(point2 == -1)
+        {
+            cromo = rand() % (size-1);
+        }
+        else
+            if(point2 > size)
+                cromo = rand() % (size-1);
+            else
+                cromo = point2;
+    else
+        if(point2 == -1)
+            if(point1 > size)
+                cromo = rand() % (size-1);
+            else
+                cromo = point1;
+        else
+            if(point1 == point2)
+                cromo = point1;
+            else
+                if(point1 < point2)
+                    cromo = (rand() % (point2 - point1)) + (point1+1);
+                else
+                    cromo = (rand() % (point1 - point2)) + (point2+1);
+
+    for(i = 0; i <= cromo ; i++)
+    {
+        aux = dna1[i];
+        dna1[i] = dna2[i];
+        dna2[i] = aux;
+    }
+                  
+}
  
 static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, FILE *fplog,t_commrec *cr)
 {
@@ -740,7 +816,7 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
 		       em_state_t *ems1,rvec *f,em_state_t *ems2,
 		       gmx_constr_t constr,gmx_localtop_t *top,
 		       t_nrnb *nrnb,gmx_wallcycle_t wcycle,
-		       int count, int precision)
+		       int count, int cross)
 
 {
   t_state *s1,*s2;
@@ -751,8 +827,8 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
 
   char binString1[FP2BIN_STRING_MAX], binString2[FP2BIN_STRING_MAX];
 
-  binAr1 = (int *) malloc(sizeof(int) * precision);
-  binAr2 = (int *) malloc(sizeof(int) * precision);
+  binAr1 = (int *) malloc(sizeof(int) * cross);
+  binAr2 = (int *) malloc(sizeof(int) * cross);
 
   s1 = &ems1->s;
   s2 = &ems2->s;
@@ -794,17 +870,21 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
   if(selProcess == 0)
 	do_ga_mutation(binString1);
   else
-	do_ga_crossover(binString1, binString2);
+    if(cross == 1)
+    	do_ga_crossover(binString1, binString2);
+    else
+    	do_ga_crossover2(binString1, binString2);
+        
   x1[selAtm][selCord] = (real)bin2fp(binString1);
   x2[selAtm][selCord] = (real)bin2fp(binString2);
-	
-  if (s2->flags & (1<<estCGP)) {
-    /* Copy the CG p vector */
+  /* Copy the CG p vector */
+  /*if (s2->flags & (1<<estCGP)) {
+    
     x1 = s1->cg_p;
     x2 = s2->cg_p;
     for(i=start; i<end; i++)
       copy_rvec(x1[i],x2[i]);
-  }
+  }*/
 
   if (DOMAINDECOMP(cr)) {
     s2->ddp_count = s1->ddp_count;
@@ -2497,19 +2577,28 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   real   terminate=0;
   
   /* GA */
-  int precision;
+  int cross;
   int generations;
   int start, end;
   int popCount, popAux;
   int cand1, cand2;
+  int ic;
   real popEnergyTotal;
   t_state *s1,*s2;
-  real *pop_energy, *pop_em;
+  real *pop_energy;
+  em_av *pop_em;
   em_state_t *s_father,*s_mother;
   em_state_t **s_pop;
   em_state_t *s_min;
   
-  //precision = 50;
+  int compare(const void * a, const void * b)
+  {
+    em_av *pop1, *pop2;
+    pop1 = (em_av *) a;
+    pop2 = (em_av *) b;
+    return ( pop1->energy - pop2->energy);
+  }
+  //cross = 50;
   //generations = 100;
 
 
@@ -2527,18 +2616,19 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   start_t=print_date_and_time(fplog,cr->nodeid,"Started Genetic Algorithm");
   wallcycle_start(wcycle,ewcRUN);
     
-  precision = inputrec->gaPrecision;
+  cross = inputrec->gaCross;
   generations = inputrec->gaGenerations;
   populationSize = inputrec->popSize;
   s_pop = (em_state_t **) malloc(sizeof(em_state_t *) * populationSize);
   pop_energy = (real *) malloc(sizeof(real) * populationSize);
-  pop_em = (real *) malloc(sizeof(real) * populationSize);
+  pop_em = (em_av *) malloc(sizeof(em_av) * populationSize);
 
   for(popCount = 0; popCount < populationSize; popCount++)
   {
   	s_pop[popCount] = init_em_state();
 	pop_energy[popCount] = 0;
-	pop_em[popCount] = 0;
+	pop_em[popCount].energy = 0;
+	pop_em[popCount].index = popCount;
   }
 
   /* Set variables for stepsize (in nm). This is the largest  
@@ -2563,7 +2653,19 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   end   = mdatoms->start + mdatoms->homenr;
 
   popEnergyTotal = 0;
-  for(popCount = 0; popCount < populationSize; popCount++)
+  popCount = 0;
+  s1 = &s_father->s;
+  s_pop[popCount]->s = *s1;
+  snew(s_pop[popCount]->s.x,s_pop[popCount]->s.nalloc);
+  snew(s_pop[popCount]->f,s_pop[popCount]->s.nalloc);
+  for(ic=0; ic<s1->natoms; ic++)
+    copy_rvec(s1->x[ic],s_pop[popCount]->s.x[ic]);
+  copy_mat(s1->box,s_pop[popCount]->s.box);
+
+  s_pop[popCount]->s.flags = s_father->s.flags;
+  s_pop[popCount]->s.natoms = s_father->s.natoms;
+  s_pop[popCount]->s.lambda = s_father->s.lambda;
+  for(popCount = 1; popCount < populationSize; popCount++)
   {
 
    
@@ -2571,7 +2673,6 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
     s_pop[popCount]->s = *s1;
     snew(s_pop[popCount]->s.x,s_pop[popCount]->s.nalloc);
     snew(s_pop[popCount]->f,s_pop[popCount]->s.nalloc);
-    int ic;
     for(ic=0; ic<s1->natoms; ic++)
       copy_rvec(s1->x[ic],s_pop[popCount]->s.x[ic]);
     copy_mat(s1->box,s_pop[popCount]->s.box);
@@ -2592,14 +2693,20 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 		    vsite,constr,fcd,graph,mdatoms,fr,
 		    mu_tot,enerd,vir,pres,-1,FALSE);
 
-	pop_energy[popCount] = s_pop[popCount]->epot;
+	//pop_energy[popCount] = s_pop[popCount]->epot;
+    pop_energy[popCount] = s_pop[popCount]->fmax;
 	popEnergyTotal += pop_energy[popCount];
   }
   for(popCount = 0; popCount < populationSize; popCount++)
   {
-	pop_em[popCount] = popEnergyTotal - pop_energy[popCount];
+	pop_em[popCount].energy = pop_energy[popCount];
+    pop_em[popCount].index = popCount;
 
   }
+
+  qsort(pop_em,populationSize, sizeof(em_av),compare);
+
+  ga_AvToPer(pop_em, popEnergyTotal, populationSize);
 
   /**** HERE STARTS THE LOOP ****
    * count is the counter for the number of steps 
@@ -2613,56 +2720,77 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   while( !bDone && !bAbort ) {
 
     bAbort = (generations > 0) && (count==generations);
-
+    //cand1 = rand()%populationSize;
+    //cand2 = rand()%populationSize;
     cand1 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize, fplog, cr);
     cand2 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize, fplog, cr);
+    fprintf(stderr, "Cand 1 = %d; Cand 2 = %d;\n",cand1,cand2);
+    fprintf(stderr, "Energy Av list:\n");
+    for(popCount = 0; popCount < populationSize; popCount++)
+    {
+        fprintf(stderr, "%d. pop_energy = %12.5e; pop_em = %12.5e; pop_index = %d\n",popCount,pop_energy[popCount],pop_em[popCount].energy,pop_em[popCount].index);
+    }
     
 	s_father = s_pop[cand1];
 	s_mother = s_pop[cand2];
 
     /* set new coordinates, except for first step */
     //if (count > 0) {
-      do_em_ga(cr,inputrec,mdatoms,s_mother,s_mother->f,s_father,
-		 constr,top,nrnb,wcycle,count, precision);
+      do_em_ga(cr,inputrec,mdatoms,s_pop[cand2],s_pop[cand2]->f,s_pop[cand1],
+		 constr,top,nrnb,wcycle,count, cross);
     //}
     
     
     evaluate_energy(fplog,bVerbose,cr,
-		    state_global,top_global,s_father,&buf,top,
+		    state_global,top_global,s_pop[cand1],&buf,top,
 		    inputrec,nrnb,wcycle,
 		    vsite,constr,fcd,graph,mdatoms,fr,
 		    mu_tot,enerd,vir,pres,count,count==0);
 
     evaluate_energy(fplog,bVerbose,cr,
-		    state_global,top_global,s_mother,&buf,top,
+		    state_global,top_global,s_pop[cand2],&buf,top,
 		    inputrec,nrnb,wcycle,
 		    vsite,constr,fcd,graph,mdatoms,fr,
 		    mu_tot,enerd,vir,pres,count,count==0);
-    
 
-	pop_energy[cand1] = s_father->epot;
-	pop_energy[cand2] = s_mother->epot;
-	pop_em[cand1] = popEnergyTotal - pop_energy[cand1];
-	pop_em[cand2] = popEnergyTotal - pop_energy[cand2];
+
+	//pop_energy[cand1] = s_pop[cand1]->epot;
+	//pop_energy[cand2] = s_pop[cand2]->epot;
+	pop_energy[cand1] = s_pop[cand1]->fmax;
+	pop_energy[cand2] = s_pop[cand2]->fmax;
+    popEnergyTotal = 0;
+    for(popCount = 0; popCount < populationSize; popCount++)
+    {
+	    popEnergyTotal += pop_energy[popCount];
+    }
+    for(popCount = 0; popCount < populationSize; popCount++)
+    {
+	    pop_em[popCount].energy = pop_energy[popCount];
+        pop_em[popCount].index = popCount;
+	}
+
+    qsort(pop_em,populationSize, sizeof(em_av),compare);
+
+    ga_AvToPer(pop_em, popEnergyTotal, populationSize);
 
 	s_min = s_pop[do_ga_min(populationSize, pop_energy)];
     
     if (MASTER(cr))
-      print_ebin_header(fplog,count,count,s_father->s.lambda);
-
-    if (count == 0)
-      s_mother->epot = s_father->epot + 1;
+      print_ebin_header(fplog,count,count,s_pop[cand1]->s.lambda);
     
+    /* Test whether the convergence criterion is met...  */
+    bDone = (s_min->fmax < inputrec->em_tol);
+
     /* Print it if necessary  */
     if (MASTER(cr)) {
       if (bVerbose) {
-		fprintf(stderr,"Generation: %5d", count);
+		fprintf(stderr,"Generation: %5d\n", count);
 		int i;
 		for(i = 0; i < populationSize; i++)
 		{
 			fprintf(stderr, "\r%5d. Energy= %12.5e nm, Fmax= %11.5e, atom= %d\n",i, s_pop[i]->epot, s_pop[i]->fmax, s_pop[i]->a_fmax+1);
 		}	
-		fprintf(stderr, "\rMin. Energy= %12.5e nm, Fmax= %11.5e, atom= %d\n", s_min->epot, s_min->fmax, s_min->a_fmax+1);
+		fprintf(stderr, "\rMin. Energy= %12.5e nm, Fmax= %11.5e, Em_Tol = %11.5e, atom= %d\n", s_min->epot,s_min->fmax, inputrec->em_tol, s_min->a_fmax+1);
 		fprintf(stderr, "--------------------------------------\n");
       }
       
@@ -2685,8 +2813,6 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
      * or if we did random steps! 
      */
     
-    /* Test whether the convergence criterion is met...  */
-    bDone = (s_father->fmax < inputrec->em_tol);
    // if ( (count==0) || (s_father->epot < s_mother->epot) ) {
      // steps_accepted++; 
 

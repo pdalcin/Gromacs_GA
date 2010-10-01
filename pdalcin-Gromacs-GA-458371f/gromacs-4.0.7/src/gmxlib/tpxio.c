@@ -541,7 +541,7 @@ static void do_inputrec(t_inputrec *ir,bool bRead, int file_version,
     do_real(ir->em_stepsize); 
     do_real(ir->em_tol); 
 
-    do_int(ir->gaPrecision); 
+    do_int(ir->gaCross); 
     do_int(ir->gaGenerations); 
     do_int(ir->popSize);
  

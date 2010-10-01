@@ -574,7 +574,7 @@ void get_ir(char *mdparin,char *mdparout,
   ITYPE ("nbfgscorr",   ir->nbfgscorr,  10); 
 
   /* GA stuff */
-  ITYPE ("gaPrecision",	ir->gaPrecision,	100);
+  ITYPE ("gaCross",	ir->gaCross,	100);
   ITYPE ("gaGenerations",	ir->gaGenerations,	100);
   ITYPE ("popSize",	ir->popSize,	100);
 

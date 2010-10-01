@@ -628,7 +628,7 @@ void pr_inputrec(FILE *fp,int indent,const char *title,t_inputrec *ir,
     PI("nstcgsteep",ir->nstcgsteep);
     PI("nbfgscorr",ir->nbfgscorr);
 
-    PI("gaPrecision",ir->gaPrecision);
+    PI("gaCross",ir->gaCross);
     PI("gaGenerations",ir->gaGenerations);
     PI("popSize",ir->popSize);
 

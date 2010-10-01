@@ -36,6 +36,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#define FP2BIN_STRING_MAX 1077
 
 #include <string.h>
 #include <time.h>
@@ -491,11 +492,97 @@ static void do_em_step(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
 }
 
 
-double ga_RealToInteger (int k, int i){
+void fp2bin_i(double fp_int, char* binString)
+{
+ int bitCount = 0;
+ int i;
+ char binString_temp[FP2BIN_STRING_MAX];
+
+ do
+   {
+    binString_temp[bitCount++] = '0' + (int)fmod(fp_int,2);
+    fp_int = floor(fp_int/2);
+   } while (fp_int > 0);
+
+ /* Reverse the binary string */
+ for (i=0; i<bitCount; i++)
+   binString[i] = binString_temp[bitCount-i-1];
+
+ binString[bitCount] = 0; //Null terminator
+}
+
+void fp2bin_f(double fp_frac, char* binString)
+{
+ int bitCount = 0;
+ double fp_int;
+
+ while (fp_frac > 0)
+   {
+    fp_frac*=2;
+    fp_frac = modf(fp_frac,&fp_int);
+    binString[bitCount++] = '0' + (int)fp_int;
+   }
+  binString[bitCount] = 0; //Null terminator
+}
+
+void fp2bin(real fp, char* binString)
+{
+ double fp_int, fp_frac;
+
+ /* Separate integer and fractional parts */
+ fp_frac = modf((double)fp,&fp_int);
+
+ /* Convert integer part, if any */
+ if (fp_int != 0)
+   fp2bin_i(fp_int,binString);
+ else
+   strcpy(binString,"0");
+
+ strcat(binString,"."); // Radix point
+
+ /* Convert fractional part, if any */
+ if (fp_frac != 0)
+   fp2bin_f(fp_frac,binString+strlen(binString)); //Append
+ else
+   strcpy(binString+strlen(binString),"0");
+}
+       
+
+real bin2fp(char* binString)
+{
+       real val;
+       int Find;
+       Find = 0;
+       int i,j;
+       i=0;
+       j=1;
+       val = 0;
+       do
+       {
+            if(binString[i] == '.')
+                            Find = 1;
+            else
+            {
+                if(binString[i] == '1')
+                                val += pow(2,i);
+            }
+            i++;
+       }while((i < strlen(binString))&&(Find == 0));
+       if(Find == 1)
+               do{
+                  if(binString[i] == '1')
+                                  val += pow(2,j*(-1));
+                  j++;
+                  i++;
+               }while(i<strlen(binString));
+       return val;
+}
+
+real ga_RealToInteger (int k, int i){
 	int inf, sup;
     double realman;
-	inf = -50;
-	sup = 50;
+	inf = -5;
+	sup = 5;
 
 	realman = inf + (sup - inf)*i/(pow(2,k) - 1);
 	
@@ -513,22 +600,22 @@ int * ga_IntToBin (int num, int k, int *binary){
 	resto = num;
 	for ( i = k; i < 0 ; i--){
 		
-		binary[i] = (resto % 2);
-		if(resto == 1) break;
-		resto = resto/2;
-
-		
+        if(resto != 0)
+        {
+		    binary[i] = (resto % 2);
+    		resto = (resto-binary[i])/2;
+        }
 	}
 	return binary;
 }
 
-int ga_IntegerConvert (int k, double Real)
+int ga_IntegerConvert (int k, real r)
 {
 	int inf, sup, theman;
-	inf = -50;
-	sup = 50;
+	inf = -5;
+	sup = 5;
 	
-	theman = ((Real + 50)*(pow(2,k) - 1))/(sup-inf);
+	theman = ((r - inf)*(pow(2,k) - 1))/(sup-inf);
 
 	return theman;
 }
@@ -543,9 +630,9 @@ int ga_BinToInt (int *binnum, int k){
 		resto[i] = binnum[i];
 	}
 
-	for(i = k ; i > 0 ; i--){
+	for(i = 0; i < k ; i++){
 		
-		inteiro = inteiro + (resto[i] * pow((resto[i] * 2), (k-i)));
+		inteiro += resto[i] * pow(2, k-i);
 	}
 	return inteiro;
 
@@ -582,71 +669,71 @@ int do_ga_min(int size, real *energyList)
 			min = energyList[i];
 		}
 	}
-	return i-1;
+	return minIndex;
 }
  
-static void do_ga_randomizer(em_state_t *e, int start, int end)
+static void do_ga_mutation(char *dna)
 {
-	bool bEqualPrevious;
-	int i;
-	int j;
-	int k;
-	int z;
-	t_state *t;
-	rvec *x;
+	int cromo,point;
 	
-	t = &e->s;
-	x = t->x;
+    do{
+    point = 0;
+	cromo = rand() % strlen(dna);
 	
-	for(i = start; i < end ; i++)
-	{
-		bEqualPrevious = TRUE;
-		while(bEqualPrevious)
-		{
-			
-			bEqualPrevious = FALSE;
-			for(j = 0; j < DIM ; j++)
-			{
-				x[i][j] = rand() % 100000;
-				x[i][j] = x[i][j] / 1000;
-				x[i][j] = x[i][j] - 50;
-			}
-		
-			for(k = start ; k < i; k ++)
-			{
-				if( (x[i][0] == x[k][0]) && 
-				(x[i][1] == x[k][1]) && 
-				(x[i][2] == x[k][2]))
-					bEqualPrevious = TRUE;
-			}
-		}
-	}
-}
- 
-static void do_ga_mutation(int *dna, int precision)
-{
-	int cromo;
-	
-	cromo = rand() % precision;
-	
-	if(dna[cromo] == 1)
-		dna[cromo] = 0;
+	if(dna[cromo] == '1')
+		dna[cromo] = '0';
 	else
-		dna[cromo] = 1;
+	    if(dna[cromo] == '0')
+		    dna[cromo] = '1';
+        else
+            point = 1;
+    }while(point == 0);
 }
 
-static void do_ga_crossover(int *dna1, int *dna2, int precision)
+static void do_ga_crossover(char *dna1, char *dna2)
 {
 	int cromo1, cromo2;
+    int size;
+    if(strlen(dna1)<strlen(dna2))
+        size = strlen(dna1);
+    else
+        size = strlen(dna2);
 	
-	cromo1 = rand() % precision;
+    do{
+    	cromo1 = rand() % size;
 	
+    }while((dna1[cromo1] == '.')||(dna2[cromo1] == '.'));
 	do{
-		cromo2 = rand() % precision;
-	}while(cromo2 == cromo1);
+    	cromo2 = rand() % size;
+	}while((cromo2 == cromo1)||(dna1[cromo2] == '.')||(dna2[cromo2] == '.'));
 	
 	dna1[cromo1] = dna2[cromo1];
 	dna2[cromo2] = dna1[cromo2];
+}
+ 
+static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, FILE *fplog,t_commrec *cr)
+{
+	int i, selAtm, selCord;;
+    int j;
+	t_state *t;
+	rvec *x1;
+    char binString1[FP2BIN_STRING_MAX];
+	
+	t = &e->s;
+	x1 = t->x;
+
+	for(i = start; i < end ; i++)
+	{
+		
+        selAtm = (rand() % md->homenr) + start;
+        selCord = rand() % DIM;
+        fp2bin(x1[selAtm][selCord],binString1);
+  
+        do_ga_mutation(binString1);
+        
+        x1[selAtm][selCord] = (real)bin2fp(binString1);
+	}
+
 }
 
 static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
@@ -661,6 +748,11 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
   int *binAr1, *binAr2, ib1, ib2;
   rvec *x1,*x2;
   real dvdlambda;
+
+  char binString1[FP2BIN_STRING_MAX], binString2[FP2BIN_STRING_MAX];
+
+  binAr1 = (int *) malloc(sizeof(int) * precision);
+  binAr2 = (int *) malloc(sizeof(int) * precision);
 
   s1 = &ems1->s;
   s2 = &ems2->s;
@@ -697,19 +789,14 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
   selAtm = (rand() % md->homenr) + start;
   selCord = rand() % DIM;
   selProcess = rand() % 2;
-  ib1 = ga_IntegerConvert(precision, x1[selAtm][selCord]);
-  ib2 = ga_IntegerConvert(precision, x2[selAtm][selCord]);
-  ga_IntToBin(ib1, precision, binAr1);
-  ga_IntToBin(ib2, precision, binAr2);
-  
+  fp2bin(x1[selAtm][selCord],binString1);
+  fp2bin(x2[selAtm][selCord],binString2);
   if(selProcess == 0)
-	do_ga_mutation(binAr1, precision);
+	do_ga_mutation(binString1);
   else
-	do_ga_crossover(binAr1, binAr2, precision);
-  ib1 = ga_BinToInt(binAr1, precision);
-  ib2 = ga_BinToInt(binAr2, precision);
-  x1[selAtm][selCord] = ga_RealToInteger(precision, ib1);
-  x2[selAtm][selCord] = ga_RealToInteger(precision, ib2);
+	do_ga_crossover(binString1, binString2);
+  x1[selAtm][selCord] = (real)bin2fp(binString1);
+  x2[selAtm][selCord] = (real)bin2fp(binString2);
 	
   if (s2->flags & (1<<estCGP)) {
     /* Copy the CG p vector */
@@ -2479,49 +2566,7 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   for(popCount = 0; popCount < populationSize; popCount++)
   {
 
-    /*if (MASTER(cr)) 
-        /* Print to the screen  */
-    /*    fprintf(stderr,"Passou 00 - %d",popCount);
-    if (fplog)
-        fprintf(fplog,"Passou 00 - %d",popCount);
-  	s1 = &s_father->s;
-  	s2 = &s_pop[popCount]->s;
-  	s2->flags = s1->flags;
-    if (MASTER(cr)) 
-        /* Print to the screen  */
-    /*    fprintf(stderr,"Passou 01 - %d",popCount);
-    if (fplog)
-        fprintf(fplog,"Passou 01 - %d",popCount);
-  	if (s2->nalloc != s1->nalloc) {
-    		s2->nalloc = s1->nalloc;
-   		srenew(s2->x,s1->nalloc);
-		srenew(s_pop[popCount]->f,  s1->nalloc);
-    		if (s2->flags & (1<<estCGP))
-      			srenew(s2->cg_p,  s1->nalloc);
-  	}
-  
-    if (MASTER(cr)) 
-        /* Print to the screen  */
-    /*    fprintf(stderr,"Passou 02 - %d",popCount);
-    if (fplog)
-        fprintf(fplog,"Passou 02 - %d",popCount);
-
-  	s2->natoms = s1->natoms;
-  	s2->lambda = s1->lambda;
-  	copy_mat(s1->box,s2->box);
-	s2->x = s1->x;*/
-    /*
-    if (DOMAINDECOMP(cr)) {
-    dd_init_local_state(cr->dd,state_global,&s_pop[popCount]->s);
-
-    dd_partition_system(fplog,inputrec->init_step,cr,TRUE,
-			state_global,top_global,inputrec,
-			&s_pop[popCount]->s,&s_pop[popCount]->f,&buf,mdatoms,top,
-			fr,vsite,NULL,constr,
-			nrnb,NULL,FALSE);
-    dd_store_state(cr->dd,&s_pop[popCount]->s);
-    } 
-    else {*/
+   
     s1 = &s_father->s;
     s_pop[popCount]->s = *s1;
     snew(s_pop[popCount]->s.x,s_pop[popCount]->s.nalloc);
@@ -2534,20 +2579,15 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   	s_pop[popCount]->s.flags = s_father->s.flags;
   	s_pop[popCount]->s.natoms = s_father->s.natoms;
   	s_pop[popCount]->s.lambda = s_father->s.lambda;
-    //}
-	do_ga_randomizer(s_pop[popCount], start, end);
+
+	do_ga_randomizer(s_pop[popCount], start, end, mdatoms,fplog, cr);
 
   }
 
   for(popCount = 0; popCount < populationSize; popCount++)
   {
-    if (MASTER(cr)) 
-        /* Print to the screen  */
-        fprintf(stderr,"\rPassou 0121 - %d - %f\n",popCount, s_father->epot);
-    if (fplog)
-        fprintf(fplog,"\rPassou 0121 - %d- %f\n",popCount, s_father->epot);
-    evaluate_energy(fplog,bVerbose,cr,                                      // something is wrong when you evaluate some one that is not s_father.
-		    state_global,top_global,s_father,&buf,top,                      // maybe something wrong with the way I'm randomizing?
+    evaluate_energy(fplog,bVerbose,cr,                              
+		    state_global,top_global,s_pop[popCount],&buf,top,                    
 		    inputrec,nrnb,wcycle,
 		    vsite,constr,fcd,graph,mdatoms,fr,
 		    mu_tot,enerd,vir,pres,-1,FALSE);
@@ -2571,37 +2611,27 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   bDone  = FALSE;
   bAbort = FALSE;
   while( !bDone && !bAbort ) {
-    bAbort = (nsteps > 0) && (count==nsteps);
 
-    cand1 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize, fplog, cr); //floating point exception | may be caused by evaluate error.
+    bAbort = (generations > 0) && (count==generations);
+
+    cand1 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize, fplog, cr);
     cand2 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize, fplog, cr);
     
 	s_father = s_pop[cand1];
 	s_mother = s_pop[cand2];
 
     /* set new coordinates, except for first step */
-    if (count > 0) {
+    //if (count > 0) {
       do_em_ga(cr,inputrec,mdatoms,s_mother,s_mother->f,s_father,
 		 constr,top,nrnb,wcycle,count, precision);
-    }
+    //}
     
-    if (MASTER(cr)) 
-        /* Print to the screen  */
-        fprintf(stderr,"Passou 02");
-    if (fplog)
-        fprintf(fplog,"Passou 02");
     
     evaluate_energy(fplog,bVerbose,cr,
 		    state_global,top_global,s_father,&buf,top,
 		    inputrec,nrnb,wcycle,
 		    vsite,constr,fcd,graph,mdatoms,fr,
 		    mu_tot,enerd,vir,pres,count,count==0);
-    
-    if (MASTER(cr)) 
-        /* Print to the screen  */
-        fprintf(stderr,"Passou 04");
-    if (fplog)
-        fprintf(fplog,"Passou 04");
 
     evaluate_energy(fplog,bVerbose,cr,
 		    state_global,top_global,s_mother,&buf,top,
@@ -2609,11 +2639,6 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 		    vsite,constr,fcd,graph,mdatoms,fr,
 		    mu_tot,enerd,vir,pres,count,count==0);
     
-    if (MASTER(cr)) 
-        /* Print to the screen  */
-        fprintf(stderr,"Passou 03");
-    if (fplog)
-        fprintf(fplog,"Passou 03");
 
 	pop_energy[cand1] = s_father->epot;
 	pop_energy[cand2] = s_mother->epot;
@@ -2638,7 +2663,7 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 			fprintf(stderr, "\r%5d. Energy= %12.5e nm, Fmax= %11.5e, atom= %d\n",i, s_pop[i]->epot, s_pop[i]->fmax, s_pop[i]->a_fmax+1);
 		}	
 		fprintf(stderr, "\rMin. Energy= %12.5e nm, Fmax= %11.5e, atom= %d\n", s_min->epot, s_min->fmax, s_min->a_fmax+1);
-		fprintf(stderr, "--------------------------------------");
+		fprintf(stderr, "--------------------------------------\n");
       }
       
      

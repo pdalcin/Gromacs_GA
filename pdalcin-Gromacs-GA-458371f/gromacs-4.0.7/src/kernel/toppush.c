@@ -1214,17 +1214,12 @@ void push_mcmove(directive d,char *line,t_ilist *ilist,int count)
                  &aa[0],&aa[1],&aa[2],&aa[3],&aa[4],&aa[5],&aa[6],&aa[7],&aa[8],&aa[9],&aa[10],&aa[11],&aa[12],&aa[13],&aa[14]);
   if(nread != count)
    gmx_fatal(FARGS,"You are supposed to enter %d atom numbers in field %s",count,dir2str(d));
-  srenew(ilist->iatoms,ilist->nr+(count == 4 ? 2 : count));
-  if(count != 4) {
+  srenew(ilist->iatoms,ilist->nr+count);
+
    for(j=0;j<count;j++)
    {
     ilist->iatoms[ilist->nr++]=aa[j]-1;
    }
-  }
-  else {
-   ilist->iatoms[ilist->nr++]=aa[1]-1;
-   ilist->iatoms[ilist->nr++]=aa[2]-1;
-  }
 
 }
 

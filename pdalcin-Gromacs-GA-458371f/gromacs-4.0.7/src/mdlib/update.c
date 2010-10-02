@@ -954,27 +954,20 @@ void set_mcmove(gmx_mc_movegroup *group,gmx_rng_t rng,real fac,int delta,int sta
 {
  int a;
  group->value = fac;
+
  group->ai = start + (group->ilist)->iatoms[delta*i];
  group->aj = start + (group->ilist)->iatoms[delta*i+1];
+
  group->bmove=TRUE;
 
  if(delta == 3) {
   group->ak = start + (group->ilist)->iatoms[delta*i+2];
-  if(uniform_int(rng,2))
-  {
-  /* a = group->ai;
-   group->ai = group->ak;
-   group->ak = a;*/
-  }
  }
- else 
+ 
+ if(delta == 4)
  {
-  if(uniform_int(rng,2))
-  {
-  /* a = group->ai;
-   group->ai = group->aj;
-   group->aj = a;*/
-  }
+  group->ai = start + (group->ilist)->iatoms[delta*i+1];
+  group->aj = start + (group->ilist)->iatoms[delta*i+2];
  }
 }
 void update(FILE         *fplog,

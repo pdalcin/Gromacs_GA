@@ -92,7 +92,7 @@ minimize.lo: minimize.c ../../src/config.h /usr/include/string.h \
  /usr/include/rpc/svc.h /usr/include/rpc/svc_auth.h \
  /usr/include/rpc/netdb.h ../../include/pme.h ../../include/gmxcomplex.h \
  ../../include/fftgrid.h ../../include/gmx_fft.h \
- ../../include/gmx_wallcycle.h
+ ../../include/gmx_wallcycle.h ../../include/bondf.h ../../include/nrnb.h
 
 ../../src/config.h:
 
@@ -511,3 +511,7 @@ minimize.lo: minimize.c ../../src/config.h /usr/include/string.h \
 ../../include/gmx_fft.h:
 
 ../../include/gmx_wallcycle.h:
+
+../../include/bondf.h:
+
+../../include/nrnb.h:

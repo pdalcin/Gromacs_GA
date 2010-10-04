@@ -533,15 +533,15 @@ void fp2bin_f(double fp_frac, char* binString)
   binString[bitCount] = 0; //Null terminator
 }
 
-void fp2bin(real fp, char* binString)
+/*void fp2bin(real fp, char* binString)
 {
  double fp_int, fp_frac;
 
  /* Separate integer and fractional parts */
- fp_frac = modf((double)fp,&fp_int);
+/* fp_frac = modf((double)fp,&fp_int);
 
  /* Convert integer part, if any */
- if (fp_int != 0)
+/* if (fp_int != 0)
    fp2bin_i(fp_int,binString);
  else
    strcpy(binString,"0");
@@ -549,7 +549,7 @@ void fp2bin(real fp, char* binString)
  strcat(binString,"."); // Radix point
 
  /* Convert fractional part, if any */
- if (fp_frac != 0)
+/* if (fp_frac != 0)
    fp2bin_f(fp_frac,binString+strlen(binString)); //Append
  else
    strcpy(binString+strlen(binString),"0");
@@ -584,7 +584,135 @@ real bin2fp(char* binString)
                   i++;
                }while(i<strlen(binString));
        return val;
+}*/
+
+int fp2bin(real fp, char* binString)
+
+{
+
+ double fp_int, fp_frac;
+
+ int flag;
+
+ 
+
+ if(fp<0)
+
+ {
+
+	fp=fp*(-1);
+
+	flag = 1;
+
+ }
+
+ else
+
+	flag = 0;
+
+
+
+ /* Separate integer and fractional parts */
+
+ fp_frac = modf((double)fp,&fp_int);
+
+
+
+ /* Convert integer part, if any */
+
+ if (fp_int != 0)
+
+   fp2bin_i(fp_int,binString);
+
+ else
+
+   strcpy(binString,"0");
+
+
+
+ strcat(binString,"."); // Radix point
+
+
+
+ /* Convert fractional part, if any */
+
+ if (fp_frac != 0)
+
+   fp2bin_f(fp_frac,binString+strlen(binString)); //Append
+
+ else
+
+   strcpy(binString+strlen(binString),"0");
+
+ return flag;
+
 }
+
+
+
+double bin2fp(char* binString, int flag)
+
+{
+
+       double val;
+
+       int Find;
+
+       Find = 0;
+
+       int i,j;
+
+       i=0;
+
+       j=1;
+
+       val = 0;
+
+       do
+
+       {
+
+            if(binString[i] == '.')
+
+                            Find = 1;
+
+            else
+
+            {
+
+                if(binString[i] == '1')
+
+                                val += pow(2,i);
+
+            }
+
+            i++;
+
+       }while((i < strlen(binString))&&(Find == 0));
+
+       if(Find == 1)
+
+               do{
+
+                  if(binString[i] == '1')
+
+                                  val += pow(2,j*(-1));
+
+                  j++;
+
+                  i++;
+
+               }while(i<strlen(binString));
+
+		if(flag == 1)
+
+			val = val * (-1);
+
+		return val;
+
+}
+
+
 
 real ga_RealToInteger (int k, int i){
 	int inf, sup;
@@ -667,7 +795,7 @@ int do_ga_addicted_rand(em_av *e, real energy, int size, FILE *fplog,t_commrec *
         i = (int)aux;
        } while(!(i >=0 && i < size));
 
- /*   for(i = 0; i < size; i++)
+   /* for(i = 0; i < size; i++)
         max+=e[i].energy;
 
 	aux = 0;
@@ -840,6 +968,7 @@ static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, F
     int ai,aj,ak,al;
     int i1,i2,i3;
     real f1,f2;
+    int flag;
 	
 	t = &e->s;
 	x1 = t->x;
@@ -861,39 +990,27 @@ static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, F
 
         for(ii=0;ii<(mc_move->group[MC_BONDS].ilist->nr/2);ii++)
         {
+         continue;
          ai = mc_move->group[MC_BONDS].ilist->iatoms[2*ii];
          aj = mc_move->group[MC_BONDS].ilist->iatoms[2*ii+1];
      
-         rvec_sub(x1[ai],x1[aj],v);
-         coord = norm(v);
-         fp2bin(coord,binString1);
-  
-         do_ga_mutation(binString1,1,1);
+         delta=(2*gmx_rng_uniform_real(rng)-1.0)*0.05;
 
-         newcoord = (real)bin2fp(binString1);
-         delta = 1e-2*(newcoord - coord);
-         printf("delta %f\n",delta);
          set_mcmove(&(mc_move->group[MC_BONDS]),rng,delta,2,start,ii);
          stretch_bonds(x1,mc_move,graph);
         }
-
         for(ii=0;ii<(mc_move->group[MC_ANGLES].ilist->nr/3);ii++)
         {
+         continue;
          ai = mc_move->group[MC_ANGLES].ilist->iatoms[3*ii];
          aj = mc_move->group[MC_ANGLES].ilist->iatoms[3*ii+1];
          ak = mc_move->group[MC_ANGLES].ilist->iatoms[3*ii+2];
      
-         coord = bond_angle(x1[ai],x1[aj],x1[ak],NULL,v1,v2,&f1,&i1,&i2);
-         fp2bin(coord,binString1);
-  
-         do_ga_mutation(binString1,1,1);
+         delta=(2*gmx_rng_uniform_real(rng)-1.0)*20*M_PI/180;
 
-         newcoord = (real)bin2fp(binString1);
-         delta = 1e-2*(newcoord - coord);
          set_mcmove(&(mc_move->group[MC_ANGLES]),rng,delta,3,start,ii);
          bend_angles(x1,mc_move,graph);
         }
-
         for(ii=0;ii<(mc_move->group[MC_DIHEDRALS].ilist->nr/4);ii++)
         {
          ai = mc_move->group[MC_DIHEDRALS].ilist->iatoms[4*ii];
@@ -901,23 +1018,21 @@ static void do_ga_randomizer(em_state_t *e, int start, int end, t_mdatoms *md, F
          ak = mc_move->group[MC_DIHEDRALS].ilist->iatoms[4*ii+2];
          al = mc_move->group[MC_DIHEDRALS].ilist->iatoms[4*ii+3];
      
-         coord = dih_angle(x1[ai],x1[aj],x1[ak],x1[al],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
-         fp2bin(coord,binString1);
-  
-         do_ga_mutation(binString1,1,1);
-
-         newcoord = (real)bin2fp(binString1);
-         delta = 1e-1*(newcoord - coord);
+         delta=(2*gmx_rng_uniform_real(rng)-1.0)*2*M_PI;
+         
          set_mcmove(&(mc_move->group[MC_DIHEDRALS]),rng,delta,4,start,ii);
-         bend_angles(x1,mc_move,graph);
+         rotate_dihedral(x1,mc_move,graph);
         }
+       /*real omega;
+         omega = (180/M_PI)*dih_angle(x1[ai],x1[aj],x1[ak],x1[al],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+       printf("omega %f %f %f %f\n",omega,coord,newcoord,delta);*/
 
  /*    rotate_dihedral(x,mc_move,graph);
      stretch_bonds(x,mc_move,graph);
      bend_angles(x,mc_move,graph);*/
 }
 
-static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
+static void do_ga_step(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
 		       em_state_t *ems1,rvec *f,em_state_t *ems2,em_state_t *ems3,
 		       gmx_constr_t constr,gmx_localtop_t *top,
 		       t_nrnb *nrnb,gmx_wallcycle_t wcycle,
@@ -936,6 +1051,7 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
   real f1,f2;
   int i1,i2,i3;
   int ai,aj,ak,al;
+ int flag1,flag2;
 
   char binString1[FP2BIN_STRING_MAX], binString2[FP2BIN_STRING_MAX];
 
@@ -947,7 +1063,7 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
   s3 = &ems3->s;
 
   if (DOMAINDECOMP(cr) && s1->ddp_count != cr->dd->ddp_count)
-    gmx_incons("state mismatch in do_em_ga");
+    gmx_incons("state mismatch in do_ga_step");
 
   s2->flags = s1->flags;
 
@@ -978,9 +1094,13 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
   selCord = uniform_int(rng,MC_NR-MC_BONDS);
   selCord += MC_BONDS;
   selProcess = rand() % 2;
+  selProcess = 0;
+  for(selCord = MC_BONDS; selCord < MC_NR; selCord++)
+  {
   switch(selCord)
   {
    case MC_BONDS:
+     break;
      jj = uniform_int(rng,(mc_move->group[MC_BONDS].ilist)->nr/2);
      ai = mc_move->group[MC_BONDS].ilist->iatoms[2*jj];
      aj = mc_move->group[MC_BONDS].ilist->iatoms[2*jj+1];
@@ -990,43 +1110,92 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
 
      rvec_sub(x2[aj],x2[ai],v);
      coord2 = norm(v);
+     if(selProcess != 0)
+     {
+      flag1 = fp2bin(coord1,binString1);
+      flag2 = fp2bin(coord2,binString2);
+      if(cross == 1)
+    	do_ga_crossover(binString1, binString2);
+      else
+    	do_ga_crossover2(binString1, binString2);
+
+      newcoord1 = (real)bin2fp(binString1,flag1);
+      newcoord2 = (real)bin2fp(binString2,flag2);
+     }
+     else
+     {
+         newcoord1 = coord1 + (2*gmx_rng_uniform_real(rng)-1.0)*0.05;
+     }
+     delta1 = newcoord1 - coord1;
+     set_mcmove(&(mc_move->group[MC_BONDS]),rng,delta1,2,start,jj);
+     stretch_bonds(x3,mc_move,graph);
     break;
    case MC_ANGLES:
+    break;
      jj = uniform_int(rng,(mc_move->group[MC_ANGLES].ilist)->nr/3);
-     ai = mc_move->group[MC_BONDS].ilist->iatoms[3*jj];
-     aj = mc_move->group[MC_BONDS].ilist->iatoms[3*jj+1];
-     ak = mc_move->group[MC_BONDS].ilist->iatoms[3*jj+2];
+     ai = mc_move->group[MC_ANGLES].ilist->iatoms[3*jj];
+     aj = mc_move->group[MC_ANGLES].ilist->iatoms[3*jj+1];
+     ak = mc_move->group[MC_ANGLES].ilist->iatoms[3*jj+2];
 
      coord1 = bond_angle(x1[ai],x1[aj],x1[ak],NULL,v1,v2,&f1,&i1,&i2);
      coord2 = bond_angle(x2[ai],x2[aj],x2[ak],NULL,v1,v2,&f1,&i1,&i2);
+
+     if(selProcess != 0)
+     {
+      flag1 = fp2bin(coord1,binString1);
+      flag2 = fp2bin(coord2,binString2);
+      if(cross == 1)
+    	do_ga_crossover(binString1, binString2);
+      else
+    	do_ga_crossover2(binString1, binString2);
+
+      newcoord1 = (real)bin2fp(binString1,flag1);
+      newcoord2 = (real)bin2fp(binString2,flag2);
+     }
+     else
+     {
+         newcoord1 = coord1 + (2*gmx_rng_uniform_real(rng)-1.0)*10*M_PI/180;
+     }
+     delta1 = newcoord1 - coord1;
+     set_mcmove(&(mc_move->group[MC_ANGLES]),rng,delta1,3,start,jj);
+     bend_angles(x3,mc_move,graph);
     break;
    case MC_DIHEDRALS:
-     jj = uniform_int(rng,(mc_move->group[MC_DIHEDRALS].ilist)->nr/4);
-     ai = mc_move->group[MC_BONDS].ilist->iatoms[3*jj];
-     aj = mc_move->group[MC_BONDS].ilist->iatoms[3*jj+1];
-     ak = mc_move->group[MC_BONDS].ilist->iatoms[3*jj+2];
-     al = mc_move->group[MC_BONDS].ilist->iatoms[3*jj+3];
+     for (jj = 0; jj< (mc_move->group[MC_DIHEDRALS].ilist)->nr/4; jj++)
+     {
+      ai = mc_move->group[MC_DIHEDRALS].ilist->iatoms[3*jj];
+      aj = mc_move->group[MC_DIHEDRALS].ilist->iatoms[3*jj+1];
+      ak = mc_move->group[MC_DIHEDRALS].ilist->iatoms[3*jj+2];
+      al = mc_move->group[MC_DIHEDRALS].ilist->iatoms[3*jj+3];
 
-     coord1 = dih_angle(x1[ai],x1[aj],x1[ak],x1[al],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
-     coord2 = dih_angle(x2[ai],x2[aj],x2[ak],x2[al],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+      coord1 = dih_angle(x1[ai],x1[aj],x1[ak],x1[al],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+      coord2 = dih_angle(x2[ai],x2[aj],x2[ak],x2[al],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+
+      if(selProcess != 0)
+      {
+       flag1 = fp2bin(coord1,binString1);
+       flag2 = fp2bin(coord2,binString2);
+       if(cross == 1)
+     	do_ga_crossover(binString1, binString2);
+       else
+     	do_ga_crossover2(binString1, binString2);
+
+       newcoord1 = (real)bin2fp(binString1,flag1);
+       newcoord2 = (real)bin2fp(binString2,flag2);
+      }
+      else
+      {
+         newcoord1 = coord1 + (2*gmx_rng_uniform_real(rng)-1.0)*30*M_PI/180;
+      }
+      delta1 = newcoord1 - coord1;
+      set_mcmove(&(mc_move->group[MC_DIHEDRALS]),rng,delta1,4,start,jj);
+      rotate_dihedral(x3,mc_move,graph);
+     }
     break;
   }
-   /*     for(ii=0;ii<(mc_move->group[MC_BONDS].ilist->nr/2);ii++)
-        {
-         rvec_sub(x1[ii+1],x1[ii],v);
-         coord = norm(v);
-         fp2bin(coord,binString1);
-  
-         do_ga_mutation(binString1,1,1);
-
-         newcoord = (real)bin2fp(binString1);
-         delta = 1e-2*(newcoord - coord);
-         printf("delta %f\n",delta);
-         set_mcmove(&(mc_move->group[MC_BONDS]),rng,delta,2,start,ii);
-         stretch_bonds(x1,mc_move,graph);
-        }*/
-  fp2bin(coord1,binString1);
-  fp2bin(coord2,binString2);
+  }
+  /*flag1 = fp2bin(coord1,binString1);
+  flag2 = fp2bin(coord2,binString2);
   if(selProcess == 0)
 	do_ga_mutation(binString1,1,1);
   else
@@ -1035,8 +1204,8 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
     else
     	do_ga_crossover2(binString1, binString2);
         
-  newcoord1 = (real)bin2fp(binString1);
-  newcoord2 = (real)bin2fp(binString2);
+  newcoord1 = (real)bin2fp(binString1,flag1);
+  newcoord2 = (real)bin2fp(binString2,flag2);
 
   switch(selCord)
   {
@@ -1064,7 +1233,7 @@ static void do_em_ga(t_commrec *cr,t_inputrec *ir,t_mdatoms *md,
      rotate_dihedral(x3,mc_move,graph);
 
     break;
-  }
+  }*/
 
 }
 
@@ -1781,6 +1950,11 @@ time_t do_cg(FILE *fplog,t_commrec *cr,
 		step,s_min->epot,s_min->fnorm/sqrt(state_global->natoms),
 		s_min->fmax,s_min->a_fmax+1);
       /* Store the new (lower) energies */
+    rvec v1,v2,v3,v4,v5;
+    real f1,f2;
+    int i1,i2,i3;
+    enerd->term[F_PRES] = (180/M_PI)*dih_angle(s_min->s.x[3],s_min->s.x[0],s_min->s.x[7],s_min->s.x[10],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+    enerd->term[F_BONDS] = (180/M_PI)*dih_angle(s_min->s.x[0],s_min->s.x[7],s_min->s.x[10],s_min->s.x[13],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
       upd_mdebin(mdebin,NULL,TRUE,mdatoms->tmass,step,(real)step,
 		 enerd,&s_min->s,s_min->s.box,
 		 NULL,NULL,vir,pres,NULL,mu_tot,constr);
@@ -2601,11 +2775,17 @@ time_t do_steep(FILE *fplog,t_commrec *cr,
       }
       
       if (s_try->epot < s_min->epot) {
+    rvec v1,v2,v3,v4,v5;
+    real f1,f2;
+    int i1,i2,i3;
+    enerd->term[F_PRES] = (180/M_PI)*dih_angle(s_try->s.x[3],s_try->s.x[0],s_try->s.x[7],s_try->s.x[10],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+    enerd->term[F_BONDS] = (180/M_PI)*dih_angle(s_try->s.x[0],s_try->s.x[7],s_try->s.x[10],s_try->s.x[13],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
 	/* Store the new (lower) energies  */
 	upd_mdebin(mdebin,NULL,TRUE,mdatoms->tmass,count,(real)count,
 		   enerd,&s_try->s,s_try->s.box,
 		   NULL,NULL,vir,pres,NULL,mu_tot,constr);
-	print_ebin(fp_ene,TRUE,
+	print_ebin(fp_ene,
+		   do_per_step(steps_accepted,inputrec->nstenergy),
 		   do_per_step(steps_accepted,inputrec->nstdisreout),
 		   do_per_step(steps_accepted,inputrec->nstorireout),
 		   fplog,count,count,count,eprNORMAL,TRUE,
@@ -2746,6 +2926,7 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   int cand1, cand2;
   int ic;
   int ii;
+  int steep,id_min;
   real popEnergyTotal;
   t_state *s1,*s2;
   real *pop_energy;
@@ -2754,6 +2935,11 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
   em_state_t **s_pop;
   em_state_t **s_pop2;
   em_state_t *s_min;
+  em_state_t *s_try;
+    rvec v1,v2,v3,v4,v5;
+    int i1,i2,i3;
+    real f1,f2;
+    real omega1,omega2;
 
        seed = make_seed();
        rng=gmx_rng_init(seed);
@@ -2848,7 +3034,61 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 
   for(popCount = 1; popCount < populationSize; popCount++)
   {
+       do
+       {
+        for(ii=0;ii<s_father->s.nalloc;ii++)
+        {
+         copy_rvec(s_father->s.x[ii],s_pop[popCount]->s.x[ii]);
+        }
+
 	do_ga_randomizer(s_pop[popCount], start, end, mdatoms,fplog, cr,graph,mc_move,rng);
+        evaluate_energy(fplog,bVerbose,cr,
+		    state_global,top_global,s_pop[popCount],&buf,top,
+		    inputrec,nrnb,wcycle,
+		    vsite,constr,fcd,graph,mdatoms,fr,
+		    mu_tot,enerd,vir,pres,count,count==0);
+       } while(s_pop[popCount]->fmax > 1e6);
+	s_min = s_pop[popCount];
+	s_try = s_pop2[0];
+    rvec v1,v2,v3,v4,v5;
+    int i1,i2,i3;
+    real f1,f2;
+    real omega1,omega2;
+    omega1 = (180/M_PI)*dih_angle(s_min->s.x[4],s_min->s.x[3],s_min->s.x[1],s_min->s.x[2],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+
+        ustep = inputrec->em_stepsize; 
+        for(steep=0;steep<0;steep++)
+        {
+         stepsize = ustep/s_min->fmax;
+         do_em_step(cr,inputrec,mdatoms,s_min,stepsize,s_min->f,s_try,
+		 constr,top,nrnb,wcycle,count);
+
+          evaluate_energy(fplog,bVerbose,cr,
+		    state_global,top_global,s_try,&buf,top,
+		    inputrec,nrnb,wcycle,
+		    vsite,constr,fcd,graph,mdatoms,fr,
+		    mu_tot,enerd,vir,pres,count,count==0);
+
+         if(s_try->epot < s_min->epot) {
+          swap_em_state(s_min,s_try);
+          ustep *= 1.2;
+         }
+         else
+         {
+          ustep *= 0.5;
+         }
+        }
+    omega2 = (180/M_PI)*dih_angle(s_min->s.x[4],s_min->s.x[3],s_min->s.x[1],s_min->s.x[2],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+
+    printf("%d %f %f\n",popCount,omega1,omega2);
+       for(ii=start;ii<end;ii++)
+       {
+        copy_rvec(s_min->s.x[ii],s_pop[popCount]->s.x[ii]);
+       }
+       s_pop[popCount]->epot = s_min->epot;
+
+    omega1 = (180/M_PI)*dih_angle(s_pop[popCount]->s.x[5],s_pop[popCount]->s.x[3],s_pop[popCount]->s.x[1],s_pop[popCount]->s.x[2],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+        fprintf(stderr, "%d.omega = %12.5f\n",popCount,omega1);
   }
 
   for(popCount = 0; popCount < populationSize; popCount++)
@@ -2860,7 +3100,6 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 		    mu_tot,enerd,vir,pres,-1,FALSE);
 
     pop_energy[popCount] = s_pop[popCount]->epot;
-	popEnergyTotal += pop_energy[popCount];
   }
   for(popCount = 0; popCount < populationSize; popCount++)
   {
@@ -2889,10 +3128,11 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
     fprintf(stderr, "Energy Av list:\n");
     for(popCount = 0; popCount < populationSize; popCount++)
     {
-        fprintf(stderr, "%d. pop_energy = %12.5e; pop_em = %12.5e; pop_index = %d\n",popCount,pop_energy[popCount],pop_em[popCount].energy,pop_em[popCount].index);
+    omega1 = (180/M_PI)*dih_angle(s_pop[popCount]->s.x[0],s_pop[popCount]->s.x[7],s_pop[popCount]->s.x[10],s_pop[popCount]->s.x[13],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+        fprintf(stderr, "%d. pop_energy = %12.5e; omega = %f; pop_index = %d  %d\n",popCount,s_pop[popCount]->epot,omega1,pop_em[popCount].index,count);
     }
 
-    for(popCount = 0; popCount < populationSize; popCount++)
+    for(popCount = 0; popCount < populationSize && count > 0; popCount++)
     {
      cand1 = do_ga_addicted_rand(pop_em, popEnergyTotal, populationSize, fplog, cr,rng);
      cand2 = cand1;
@@ -2903,10 +3143,14 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 
      } while(cand2 == cand1);
 
-     //fprintf(stderr, "Cand 1 = %d; Cand 2 = %d;\n",cand1,cand2);
+   //  fprintf(stderr, "Cand 1 = %d; Cand 2 = %d;\n",cand1,cand2);
     
 	s_father = s_pop[cand1];
 	s_mother = s_pop[cand2];
+
+    omega1 = (180/M_PI)*dih_angle(s_father->s.x[4],s_father->s.x[3],s_father->s.x[1],s_father->s.x[2],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+
+    //fprintf(stderr,"sfather omega %f %d\n",omega1,popCount);
     
     /* set new coordinates, except for first step */
     //if (count > 0) {
@@ -2916,31 +3160,60 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
       copy_rvec(s_father->s.x[ii],s_pop2[popCount]->s.x[ii]);
      }
 
-     do_em_ga(cr,inputrec,mdatoms,s_pop[cand2],s_pop[cand2]->f,s_pop[cand1],s_pop2[popCount],
+       do_ga_step(cr,inputrec,mdatoms,s_pop[cand2],s_pop[cand2]->f,s_pop[cand1],s_pop2[popCount],
 		 constr,top,nrnb,wcycle,count, cross,mc_move,rng,graph);
-    //}
+
+       evaluate_energy(fplog,bVerbose,cr,
+        state_global,top_global,s_pop2[popCount],&buf,top,
+        inputrec,nrnb,wcycle,
+        vsite,constr,fcd,graph,mdatoms,fr,
+        mu_tot,enerd,vir,pres,count,count==0);
+
+	s_min = s_pop2[popCount];
+        if(popCount < populationSize-1)
+        {
+         s_try = s_pop2[popCount+1];
+        }
+        else
+        {
+         s_try = s_pop[0]; /* We dont need s_pop anymore so we can use this */
+        }
+
+       if(bAbort && s_min->fmax < 1e6)
+       {
+        ustep = inputrec->em_stepsize; 
+        for(steep=0;steep<100;steep++)
+        {
+         stepsize = ustep/s_min->fmax;
+         do_em_step(cr,inputrec,mdatoms,s_min,stepsize,s_min->f,s_try,
+		 constr,top,nrnb,wcycle,count);
+
+          evaluate_energy(fplog,bVerbose,cr,
+           state_global,top_global,s_try,&buf,top,
+           inputrec,nrnb,wcycle,
+           vsite,constr,fcd,graph,mdatoms,fr,
+           mu_tot,enerd,vir,pres,count,count==0);
+
+         if(s_try->epot < s_min->epot) {
+          swap_em_state(s_min,s_try);
+          ustep *= 1.2;
+         }
+         else
+         {
+          ustep *= 0.5;
+         }
+        }
+        for(ii=start;ii<end;ii++)
+        {
+         copy_rvec(s_min->s.x[ii],s_pop2[popCount]->s.x[ii]);
+        }
+        s_pop2[popCount]->epot = s_min->epot;
+        s_pop2[popCount]->fmax = s_min->fmax;
+       }
     
-    
-    evaluate_energy(fplog,bVerbose,cr,
-		    state_global,top_global,s_pop2[popCount],&buf,top,
-		    inputrec,nrnb,wcycle,
-		    vsite,constr,fcd,graph,mdatoms,fr,
-		    mu_tot,enerd,vir,pres,count,count==0);
-
-    /*evaluate_energy(fplog,bVerbose,cr,
-		    state_global,top_global,s_pop[cand2],&buf,top,
-		    inputrec,nrnb,wcycle,
-		    vsite,constr,fcd,graph,mdatoms,fr,
-		    mu_tot,enerd,vir,pres,count,count==0);
-
-
-	pop_energy[cand1] = s_pop[cand1]->epot;
-	pop_energy[cand2] = s_pop[cand2]->epot;*/
     }
-	/*pop_energy[cand1] = s_pop[cand1]->fmax;
-	pop_energy[cand2] = s_pop[cand2]->fmax;*/
-    popEnergyTotal = 0;
-    for(popCount = 0; popCount < populationSize; popCount++)
+
+    for(popCount = 0; popCount < populationSize && count > 0; popCount++)
     {
        for(ii=start;ii<end;ii++)
        {
@@ -2948,7 +3221,6 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
        }
             s_pop[popCount]->epot = s_pop2[popCount]->epot;
             pop_energy[popCount] = s_pop[popCount]->epot;
-	    popEnergyTotal += pop_energy[popCount];
     }
     for(popCount = 0; popCount < populationSize; popCount++)
     {
@@ -2962,21 +3234,59 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
     //fprintf(stderr,"pop d em 0 %d %d %d %d \n",pop_em[0].index,pop_em[1].index,pop_em[2].index,pop_em[3].index);
 
     //ga_AvToPer(pop_em, popEnergyTotal, populationSize);
-
-	s_min = s_pop[do_ga_min(populationSize, pop_energy)];
+	id_min = (count > 0) ? do_ga_min(populationSize, pop_energy): 0;
+	s_min = s_pop[id_min];
     
     evaluate_energy(fplog,bVerbose,cr,
 		    state_global,top_global,s_min,&buf,top,
 		    inputrec,nrnb,wcycle,
 		    vsite,constr,fcd,graph,mdatoms,fr,
 		    mu_tot,enerd,vir,pres,count,count==0);
-    fprintf(stderr,"min %f\n",enerd->term[F_EPOT]);
+
     if (MASTER(cr))
-      print_ebin_header(fplog,count,count,s_pop[cand1]->s.lambda);
+      print_ebin_header(fplog,count,count,s_min->s.lambda);
     
     /* Test whether the convergence criterion is met...  */
     bDone = (s_min->fmax < inputrec->em_tol);
     bDone = FALSE;	
+
+   if(bAbort || bDone)
+   {
+     fprintf(fplog,"Doing steepest descent run on final structure\n\n");
+
+        s_try = s_pop2[0]; 
+
+       if(s_min->fmax < 1e6)
+       {
+        ustep = inputrec->em_stepsize; 
+        for(steep=0;steep<2000;steep++)
+        {
+         stepsize = ustep/s_min->fmax;
+         do_em_step(cr,inputrec,mdatoms,s_min,stepsize,s_min->f,s_try,
+		 constr,top,nrnb,wcycle,count);
+
+          evaluate_energy(fplog,bVerbose,cr,
+           state_global,top_global,s_try,&buf,top,
+           inputrec,nrnb,wcycle,
+           vsite,constr,fcd,graph,mdatoms,fr,
+           mu_tot,enerd,vir,pres,count,count==0);
+
+         if(s_try->epot < s_min->epot) {
+          swap_em_state(s_min,s_try);
+          ustep *= 1.2;
+         }
+         else
+         {
+          ustep *= 0.5;
+         }
+         if (ustep < 1e-6)
+         {
+          break;
+         }
+        }
+      }
+     }
+
 
     /* Print it if necessary  */
     if (MASTER(cr)) {
@@ -2991,14 +3301,19 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
 		fprintf(stderr, "--------------------------------------\n");
       }
       
+    enerd->term[F_PRES] = (180/M_PI)*dih_angle(s_min->s.x[3],s_min->s.x[0],s_min->s.x[7],s_min->s.x[10],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+    fprintf(stderr,"min %f %f %d\n",enerd->term[F_EPOT],enerd->term[F_PRES],count);
+    enerd->term[F_BONDS] = (180/M_PI)*dih_angle(s_min->s.x[0],s_min->s.x[7],s_min->s.x[10],s_min->s.x[13],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+    fprintf(stderr,"min %f %f %d\n",enerd->term[F_EPOT],enerd->term[F_PRES],count);
      
 	/* Store the new (lower) energies  */
 	upd_mdebin(mdebin,NULL,TRUE,mdatoms->tmass,count,(real)count,
 		   enerd,&s_min->s,s_min->s.box,
 		   NULL,NULL,vir,pres,NULL,mu_tot,constr);
-	print_ebin(fp_ene,TRUE,
-		   TRUE,
-		   TRUE,
+	print_ebin(fp_ene,
+		   do_per_step(count,inputrec->nstenergy),
+		   do_per_step(count,inputrec->nstdisreout),
+		   do_per_step(count,inputrec->nstorireout),
 		   fplog,count,count,count,eprNORMAL,TRUE,
 		   mdebin,fcd,&(top_global->groups),&(inputrec->opts));
 	fflush(fplog);
@@ -3008,6 +3323,9 @@ time_t do_ga(FILE *fplog,t_commrec *cr,
       
     } 
     
+    omega1 = (180/M_PI)*dih_angle(s_min->s.x[4],s_min->s.x[3],s_min->s.x[1],s_min->s.x[2],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+    omega2 = (180/M_PI)*dih_angle(s_min->s.x[10],s_min->s.x[4],s_min->s.x[8],s_min->s.x[9],NULL,v1,v2,v3,v4,v5,&f1,&f2,&i1,&i2,&i3);
+    fprintf(stderr,"last %f %f\n",omega1,omega2);
     /* Now if the new energy is smaller than the previous...  
      * or if this is the first step!
      * or if we did random steps! 
